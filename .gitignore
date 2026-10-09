@@ -1,0 +1,36 @@
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Salidas de build
+dist/
+build/
+.next/
+
+# Cachés
+.turbo/
+.cache/
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
+
+# Varios
+coverage/
+*.tsbuildinfo
+
+# Payload CMS (SQLite local)
+*.db
+*.db-*
