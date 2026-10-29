@@ -1,0 +1,47 @@
+
+/*
+ * Portal San Pablo — CMS
+ * Estilos específicos del formulario de edición de productos.
+ */
+
+/* Campo de imagen del producto: columna izquierda. */
+.sp-product-image-field {
+  grid-column: 1;
+  width: 100%;
+}
+
+/* Vista previa de la imagen cargada. */
+.sp-product-image-field img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Filas de campos del producto: columna derecha. */
+.sp-product-fields-row {
+  grid-column: 2;
+}
+
+/* Descripción a lo ancho del formulario. */
+.sp-product-description-field {
+  grid-column: 1 / -1;
+}
+
+/* Diseño adaptable para pantallas pequeñas. */
+@media (max-width: 768px) {
+  .sp-product-image-field,
+  .sp-product-fields-row,
+  .sp-product-description-field {
+    grid-column: auto;
+  }
+
+  .sp-product-image-field {
+    width: 100%;
+  }
+
+  .sp-product-image-field img {
+    max-width: 100%;
+    height: auto;
+  }
+}

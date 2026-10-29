@@ -34,3 +34,11 @@ coverage/
 # Payload CMS (SQLite local)
 *.db
 *.db-*
+
+# Copias de seguridad locales de la base de datos
+# (los *.db ya quedan cubiertos arriba; esto protege el directorio
+# completo frente a otro tipo de archivo: .sql, .json, .zip, etc.)
+backups/
+
+# Payload CMS (almacenamiento local de archivos)
+apps/cms/uploads/
