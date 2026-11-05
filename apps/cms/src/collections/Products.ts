@@ -1,4 +1,9 @@
 import type { CollectionConfig } from "payload";
+import {
+  syncProductToNestJS,
+  deactivateProductInNestJS,
+  mapPayloadProductToSync,
+} from "../sync/nestjs-sync";
 
 const slugify = (value: string): string =>
   value
@@ -342,6 +347,19 @@ export const Products: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
+      // Sanitiza marcas de tiempo inválidas antes de guardar.
+      // Evita RangeError: Invalid time value al llamar .toISOString() en el admin.
+      ({ data }) => {
+        const now = new Date().toISOString();
+        const isValidDate = (value: unknown): boolean => {
+          if (value === null || value === undefined) return false;
+          const d = new Date(value as string);
+          return !isNaN(d.getTime());
+        };
+        if (!isValidDate(data.createdAt)) data.createdAt = now;
+        if (!isValidDate(data.updatedAt)) data.updatedAt = now;
+        return data;
+      },
       // Generación automática del slug a partir del título.
       // - En creación: si el slug viene vacío, se genera desde el título.
       // - En actualización: nunca se sobrescribe (conserva slugs existentes y ediciones manuales).
@@ -353,6 +371,40 @@ export const Products: CollectionConfig = {
           }
         }
         return data;
+      },
+    ],
+    afterChange: [
+      // Sincronización unidireccional Payload → NestJS tras crear o actualizar.
+      // - Solo se envían los campos comerciales necesarios.
+      // - Los errores de red no fallan la operación en el CMS (se registran con contexto).
+      // - No hay ciclo: NestJS no devuelve nada a Payload.
+      async ({ operation, data, doc }) => {
+        if (operation === "create" || operation === "update") {
+          try {
+            const syncData = { ...data, id: doc?.id ?? data.id };
+            await syncProductToNestJS(mapPayloadProductToSync(syncData));
+          } catch (error) {
+            console.error(
+              `[Payload→NestJS] Error en afterChange (${operation}, payloadId=${doc?.id ?? data?.id}):`,
+              error instanceof Error ? error.message : String(error),
+            );
+          }
+        }
+      },
+    ],
+    afterDelete: [
+      // Desactivación lógica en NestJS cuando un producto se elimina de Payload.
+      // - Nunca borra físicamente en PostgreSQL: visible=false y status='draft'.
+      // - Los errores se registran con contexto para facilitar depuración.
+      async ({ id }) => {
+        try {
+          await deactivateProductInNestJS(id);
+        } catch (error) {
+          console.error(
+            `[Payload→NestJS] Error en afterDelete (payloadId=${id}):`,
+            error instanceof Error ? error.message : String(error),
+          );
+        }
       },
     ],
   },

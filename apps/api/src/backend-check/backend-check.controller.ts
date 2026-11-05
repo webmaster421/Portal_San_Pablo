@@ -10,5 +10,3 @@ export class BackendCheckController {
     return this.backendCheckService.findAll();
   }
 }
-
-/prueba de commit/

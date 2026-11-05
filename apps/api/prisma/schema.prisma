@@ -12,3 +12,35 @@ model BackendCheck {
   message   String
   createdAt DateTime @default(now())
 }
+
+model Product {
+  id            Int      @id @default(autoincrement())
+  payloadId     Int      @unique
+  title         String
+  slug          String   @unique
+  isbn          String
+  author        String
+  price         Int
+  imageUrl      String?
+  categoryName  String?
+  weight        Decimal? @db.Decimal(10, 3)
+  width         Int?
+  height        Int?
+  description   Json?
+  status        String   @default("draft")
+  appliesTax    Boolean  @default(false)
+  taxValue      Decimal? @db.Decimal(5, 2)
+  appliesShipping Boolean @default(false)
+  pages         Int?
+  keywords      String[] @default([])
+  tags          String[] @default([])
+  isNew         Boolean  @default(false)
+  visible       Boolean  @default(true)
+  inventory     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@index([isNew])
+  @@index([createdAt])
+}
