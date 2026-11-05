@@ -1,0 +1,67 @@
+%% C4 Level 2 — Containers
+%% Portal San Pablo — Contenedores y sus relaciones
+
+flowchart TB
+    %% Actores
+    Customer((Cliente)):::actor
+    Admin((Administrador)):::actor
+
+    %% Next.js Storefront
+    subgraph Web["Next.js (apps/web)"]
+        WebApp["Server Components<br/>API Routes<br/>lib/cms.ts"]:::container
+    end
+
+    %% Payload CMS
+    subgraph Cms["Payload CMS (apps/cms)"]
+        CmsAdmin["Admin panel /admin"]:::container
+        CmsApi["API REST /api/*"]:::container
+        CmsHooks["Hooks afterChange / afterDelete<br/>colección products"]:::container
+        CmsSync["Cliente de sincronización<br/>nestjs-sync.ts"]:::container
+        CmsDb[("(payload.db)<br/>SQLite")]:::db
+    end
+
+    %% NestJS API
+    subgraph Api["NestJS API (apps/api)"]
+        ApiGw["Controladores<br/>products.controller.ts"]:::container
+        ApiSvc["Servicios<br/>products.service.ts"]:::container
+        ApiSync["Sync endpoints<br/>sync.controller.ts"]:::container
+        ApiGuard["HmacAuthGuard<br/>AuthGuard (futuro)"]:::container
+        ApiPrisma["PrismaService<br/>ORM"]:::container
+        ApiDb[("(sanpablo)<br/>PostgreSQL")]:::db
+    end
+
+    %% Relaciones: Cliente → Web
+    Customer -->|HTTP| WebApp
+
+    %% Relaciones: Admin → CMS
+    Admin -->|HTTP| CmsAdmin
+    Admin -->|HTTP| CmsApi
+
+    %% Relaciones: Web → API (ADR-P01)
+    WebApp -->|REST api/v1/products| ApiGw
+
+    %% Relaciones: CMS → API (sync HMAC)
+    CmsHooks -->|Llama syncProductToNestJS| CmsSync
+    CmsSync -->|HTTP POST/PATCH + HMAC| ApiSync
+
+    %% Relaciones: API → DB
+    ApiGw -->|Prisma ORM| ApiPrisma
+    ApiSvc -->|Prisma ORM| ApiPrisma
+    ApiSync -->|Prisma ORM| ApiPrisma
+    ApiPrisma -->|SQL| ApiDb
+
+    %% Relaciones: CMS → SQLite interno
+    CmsAdmin -->|SQLite| CmsDb
+    CmsApi -->|SQLite| CmsDb
+
+    %% Estilos
+    classDef actor fill:#f9d79b,stroke:#e67e22,stroke-width:2px
+    classDef container fill:#aed6f1,stroke:#3498db,stroke-width:2px
+    classDef db fill:#a9dfbf,stroke:#27ae60,stroke-width:2px
+
+    linkStyle 0,1 stroke:#7f8c8d,stroke-width:2px
+    linkStyle 2,3 stroke:#7f8c8d,stroke-width:2px
+    linkStyle 4 stroke:#2980b9,stroke-width:2px
+    linkStyle 5,6 stroke:#c0392b,stroke-width:2px
+    linkStyle 7,8,9 stroke:#27ae60,stroke-width:2px
+    linkStyle 10,11 stroke:#95a5a6,stroke-width:2px

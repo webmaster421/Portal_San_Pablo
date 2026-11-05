@@ -1,0 +1,37 @@
+%% Secuencia: Eliminación lógica (soft delete) de producto
+
+sequenceDiagram
+    autonumber
+    participant A as Administrador
+    participant NJ as NestJS API<br/>(apps/api, puerto 3002)
+    participant PG as PostgreSQL<br/>(sanpablo)
+    participant PC as Payload CMS<br/>(apps/cms)
+    participant SQLite as SQLite<br/>(payload.db)
+
+    autonumber
+    note over A,NJ: Escenario 1: Soft delete desde NestJS (endpoint ordinario)
+    
+    A->>+NJ: DELETE /api/v1/products/:id<br/>Authorization: Bearer <admin_token>
+    
+    alt Autenticación y rol válidos (ADR-P02)
+        NJ->>+PG: UPDATE "Product"<br/>SET visible=false, status='draft',<br/>deletedAt=now(), deletedBy='admin_id'<br/>WHERE id = $1 AND deletedAt IS NULL
+        PG-->>-NJ: Registro actualizado (soft delete)
+        NJ-->>-A: 200 OK {deleted: true, id}
+    else Token inválido o rol insuficiente
+        NJ-->>-A: 401 Unauthorized / 403 Forbidden
+    end
+
+    note over PC,SQLite: El producto sigue en SQLite de Payload<br/>con su estado anterior (inconsistencia aceptada<br/>por arquitectura unidireccional)
+
+    note over A,PG: Escenario 2: Soft delete desde Payload (sync existente)
+    
+    A->>+PC: Eliminar producto en panel admin de Payload
+    PC->>+SQLite: DELETE FROM products WHERE id = ?
+    PC->>+NJ: PATCH /api/v1/sync/products/:payloadId/deactivate<br/>X-Hmac-Signature: sha256=...
+    
+    NJ->>+PG: UPDATE "Product"<br/>SET visible=false, status='draft'<br/>WHERE payloadId = $1
+    PG-->>-NJ: Registro actualizado
+    NJ-->>-PC: 200 OK
+    PC-->>-A: Producto eliminado en Payload
+
+    note over PG: En ambos casos: eliminación lógica,<br/>no borrado físico (ADR-P03)

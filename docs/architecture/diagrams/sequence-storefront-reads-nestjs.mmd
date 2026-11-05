@@ -1,0 +1,40 @@
+%% Secuencia: Lectura de productos desde Next.js a través de NestJS (ADR-P01)
+
+sequenceDiagram
+    autonumber
+    participant C as Cliente (navegador)
+    participant NW as Next.js Server<br/>(apps/web, puerto 3000)
+    participant NJ as NestJS API<br/>(apps/api, puerto 3002)
+    participant PG as PostgreSQL<br/>(sanpablo)
+
+    autonumber
+    note over C,NW: Lectura pública (sin autenticación)
+    
+    C->>+NW: GET /productos?slug=zapatillas-running (SSR)
+    
+    NW->>+NJ: GET /api/v1/products/slug/zapatillas-running<br/>cache: no-store<br/>Timeout: 5s
+    
+    NJ->>+PG: SELECT * FROM "Product"<br/>WHERE slug = $1<br/>AND status = 'published'<br/>AND visible = true<br/>AND deletedAt IS NULL
+    PG-->>-NJ: Producto encontrado
+    
+    NJ-->>-NW: 200 JSON {id, title, price, slug, ...}
+    
+    alt Éxito
+        NW-->>-C: HTML renderizado con producto
+    else NestJS no disponible (503 / timeout)
+        NW-->>-C: "El catálogo no está disponible"
+    else Producto no encontrado (404)
+        NW-->>-C: Página "Producto no encontrado"
+    end
+
+    note over C,NW: Lectura administrativa (con autenticación)
+    
+    C->>+NW: GET /admin/productos<br/>Cookie: access_token
+    
+    NW->>+NJ: GET /api/v1/products<br/>Authorization: Bearer <access_token>
+    
+    NJ->>+PG: SELECT * FROM "Product"<br/>ORDER BY createdAt DESC<br/>(sin filtro de publicado/visible para admin)
+    PG-->>-NJ: Todos los productos
+    
+    NJ-->>-NW: 200 JSON (lista completa)
+    NW-->>-C: HTML con panel de administración

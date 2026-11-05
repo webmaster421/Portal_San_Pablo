@@ -1,0 +1,48 @@
+%% Secuencia: Crear producto en Payload → sincronizar a NestJS → guardar en PostgreSQL
+%% Aplica después de la corrección del hook afterChange (doc.id en lugar de data.id)
+
+sequenceDiagram
+    autonumber
+    participant A as Administrador
+    participant PC as Payload CMS<br/>(apps/cms)
+    participant SQLite as SQLite<br/>(payload.db)
+    participant W as Worker Outbox<br/>(ADR-P04 futuro)
+    participant OB as Tabla sync_outbox<br/>(ADR-P04 futuro)
+    participant NJ as NestJS API<br/>(apps/api, puerto 3002)
+    participant PG as PostgreSQL<br/>(sanpablo)
+
+    autonumber
+    A->>+PC: Crear producto en panel admin<br/>(título, precio, slug, etc.)
+    
+    note over PC,SQLite: Transacción atómica en SQLite
+    PC->>+SQLite: INSERT INTO products (...)
+    PC->>+OB: INSERT INTO sync_outbox<br/>(payloadId, operation='create', payload, status='pending')
+    SQLite-->>-PC: Confirmado
+    OB-->>-PC: Confirmado
+    
+    PC-->>-A: 201 Producto creado
+
+    note over W,NJ: Procesamiento asíncrono del outbox
+    W->>+OB: SELECT * FROM sync_outbox<br/>WHERE status='pending' AND nextRetry <= now()
+    OB-->>-W: Registro pendiente (payloadId=4)
+    
+    W->>+OB: UPDATE sync_outbox SET status='processing'<br/>WHERE id = ?
+    
+    W->>+NJ: POST /api/v1/sync/products<br/>X-Timestamp: ...<br/>X-Hmac-Signature: sha256=...<br/>Body: {payloadId, title, slug, price, ...}
+    
+    alt NestJS responde 201/200 (éxito)
+        NJ->>+PG: upsert por payloadId<br/>(INSERT o UPDATE)
+        PG-->>-NJ: Producto guardado (id=54)
+        NJ-->>-W: 201 {"synced":true,"productId":54}
+        W->>+OB: UPDATE sync_outbox SET status='completed'<br/>WHERE id = ?
+    else NestJS responde 5xx / timeout
+        NJ-->>-W: Error 503 / Timeout
+        W->>+OB: UPDATE sync_outbox SET status='pending',<br/>nextRetry = now() + backoff(),<br/>lastError = '...'
+    else NestJS responde 4xx (cliente)
+        NJ-->>-W: 400 payloadId requerido / 409 conflicto
+        W->>+OB: UPDATE sync_outbox SET status='failed'<br/>WHERE id = ?
+    end
+    
+    NJ-->>-W: Respuesta final
+    
+    note over PG: Producto persistido en PostgreSQL<br/>disponible para GET /api/v1/products

@@ -1,0 +1,45 @@
+%% C4 Level 1 — System Context
+%% Portal San Pablo — Arquitectura de solución
+%% Muestra los actores y los sistemas del ecosistema
+
+flowchart LR
+    %% Actores
+    Customer((Cliente)):::actor
+    Admin((Administrador<br/>de catálogo)):::actor
+
+    %% Sistemas
+    subgraph Storefront["Storefront (Next.js)"]
+        Web["Next.js<br/>Puerto 3000"]:::system
+    end
+
+    subgraph CMS["Payload CMS (Administración)"]
+        Cms["Payload CMS<br/>Puerto 3001<br/>SQLite (payload.db)"]:::system
+    end
+
+    subgraph API["API Central (NestJS)"]
+        Api["NestJS API<br/>Puerto 3002<br/>api/v1"]:::system
+    end
+
+    subgraph DB["Base de datos central"]
+        Pg[("PostgreSQL<br/>sanpablo<br/>Puerto 5433")]:::db
+    end
+
+    %% Relaciones
+    Customer -->|HTTP (navegador)| Web
+    Admin -->|HTTP (panel admin)| Cms
+    Web -->|REST api/v1| Api
+    Cms -->|REST + HMAC| Api
+    Api -->|Prisma ORM| Pg
+    Cms -->|SQLite interno| Cms
+
+    %% Estilos
+    classDef actor fill:#f9d79b,stroke:#e67e22,stroke-width:2px
+    classDef system fill:#aed6f1,stroke:#3498db,stroke-width:2px
+    classDef db fill:#a9dfbf,stroke:#27ae60,stroke-width:2px
+
+    linkStyle 0 stroke:#7f8c8d,stroke-width:2px
+    linkStyle 1 stroke:#7f8c8d,stroke-width:2px
+    linkStyle 2 stroke:#2980b9,stroke-width:2px
+    linkStyle 3 stroke:#c0392b,stroke-width:2px
+    linkStyle 4 stroke:#27ae60,stroke-width:2px
+    linkStyle 5 stroke:#95a5a6,stroke-width:2px
