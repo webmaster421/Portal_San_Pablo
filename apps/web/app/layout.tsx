@@ -2,18 +2,18 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Portal San Pablo",
-  description: "Nuevo E-commerce Portal San Pablo",
+  title: "Coursue - E-learning Dashboard",
+  description: "Panel de administración de plataforma de cursos en línea",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="es">
-      <body className="text-sky-950">{children}</body>
+      <body className="h-full bg-gray-50">{children}</body>
     </html>
   );
 }

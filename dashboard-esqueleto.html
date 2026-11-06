@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Esqueleto Responsive</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    /* Oculta scrollbar pero mantiene funcionalidad */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900 antialiased selection:bg-blue-500 selection:text-white">
+
+  <!-- ================================================================
+       OVERLAY MOBILE (Drawer lateral izquierdo)
+       ================================================================ -->
+  <div
+    id="mobileOverlay"
+    class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm hidden lg:hidden"
+    onclick="closeLeftSidebar()"
+  ></div>
+
+  <!-- ================================================================
+       CONTENEDOR PRINCIPAL
+       Desktop (lg): 3 columnas | Tablet/Mobile: columna + drawer
+       ================================================================ -->
+  <div class="flex flex-col lg:flex-row h-screen overflow-hidden">
+
+    <!-- ------------------------------------------------------------------
+         SIDEBAR IZQUIERDO - Menú de navegación
+         Desktop: ancho fijo w-64 | Móvil: drawer deslizable
+       ------------------------------------------------------------------ -->
+  <aside
+    id="leftSidebar"
+    class="fixed lg:relative inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out"
+  >
+    <div class="flex flex-col h-full">
+      <!-- Brand / Logo -->
+      <div class="flex items-center gap-3 p-6 border-b border-gray-200">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+          S
+        </div>
+        <span class="font-bold text-lg tracking-tight">SanPablo</span>
+      </div>
+
+      <!-- Navegación principal -->
+      <nav class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-1">
+        <div class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Navegación</div>
+
+        <!-- Item: Dashboard -->
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-blue-50 text-blue-600 font-medium">
+          <div class="w-5 h-5 bg-blue-600 rounded flex items-center justify-center text-white text-[10px]">D</div>
+          <span>Dashboard</span>
+        </a>
+
+        <!-- Item: Cursos -->
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <div class="w-5 h-5 rounded flex items-center justify-center text-[10px] text-gray-400">C</div>
+          <span>Cursos</span>
+        </a>
+
+        <!-- Item: Progreso -->
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <div class="w-5 h-5 rounded flex items-center justify-center text-[10px] text-gray-400">P</div>
+          <span>Progreso</span>
+        </a>
+
+        <!-- Item: Mis lecciones -->
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <div class="w-5 h-5 rounded flex items-center justify-center text-[10px] text-gray-400">L</div>
+          <span>Mis lecciones</span>
+        </a>
+
+        <div class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-4">Configuración</div>
+
+        <!-- Item: Perfil -->
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <div class="w-5 h-5 rounded flex items-center justify-center text-[10px] text-gray-400">U</div>
+          <span>Perfil</span>
+        </a>
+
+        <!-- Item: Notificaciones -->
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <div class="w-5 h-5 rounded flex items-center justify-center text-[10px] text-gray-400">N</div>
+          <span>Notificaciones</span>
+        </a>
+
+        <!-- Item: Salir -->
+        <div class="mt-8">
+          <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 hover:bg-gray-50 hover:text-red-600 transition-colors">
+            <div class="w-5 h-5 rounded flex items-center justify-center text-[10px] text-gray-400">X</div>
+            <span>Cerrar sesión</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- Botón cerrar drawer (solo móvil/tablet) -->
+      <div class="lg:hidden p-4 border-t border-gray-200">
+        <button
+          onclick="closeLeftSidebar()"
+          class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-600 bg-gray-50 rounded-xl hover:bg-gray-200 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          Cerrar menú
+        </button>
+      </div>
+    </div>
+  </aside>
+
+    <!-- ------------------------------------------------------------------
+         ÁREA CENTRAL PRINCIPAL
+       ------------------------------------------------------------------ -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden lg:ml-0">
+      
+      <!-- Header superior -->
+      <header class="bg-white border-b border-gray-200 flex-shrink-0 p-4 lg:p-6 z-20">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+          
+          <!-- Botón hamburguesa (móvil) -->
+          <div class="lg:hidden flex-shrink-0">
+            <button
+              id="btnOpenSidebar"
+              onclick="openLeftSidebar()"
+              class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+          </div>
+
+          <!-- Buscador -->
+          <div class="relative w-full max-w-md flex-grow">
+            <div class="placeholder bg-gray-100 h-10 rounded-full w-full flex items-center pl-4 pr-3 text-gray-400 text-sm">
+              <span class="w-4 h-4 bg-gray-300 rounded-full mr-2"></span>
+              Buscar cursos, lecciones...
+            </div>
+            <!-- <!-- Campo de buscador --> -->
+          </div>
+
+          <!-- Perfil / Acciones -->
+          <div class="flex items-center gap-3 lg:gap-4">
+            <!-- Icono notificaciones -->
+            <div class="lg:hidden p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            </div>
+            <!-- Avatar perfil -->
+            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-xs font-medium">
+              JP
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Contenido con scroll vertical -->
+      <div class="flex-1 overflow-y-auto no-scrollbar p-4 lg:p-6 space-y-6">
+
+        <!-- ================================================================
+             BANNER HERO - "Sharpen Your Skills"
+           ================================================================ -->
+        <section class="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 lg:p-8">
+          <!-- <!-- Banner Hero: título, subtítulo, CTA y fondo ilustrativo --> -->
+        </section>
+
+        <!-- ================================================================
+             FILA DE MÉTRICAS RÁPIDAS / PROGRESO DE CURSOS (3 tarjetas)
+           ================================================================ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Tarjeta métrica 1 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+            <!-- <!-- Métrica 1: número, etiqueta, barra de progreso --> -->
+          </div>
+          <!-- Tarjeta métrica 2 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+            <!-- <!-- Métrica 2: número, etiqueta, barra de progreso --> -->
+          </div>
+          <!-- Tarjeta métrica 3 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+            <!-- <!-- Métrica 3: número, etiqueta, barra de progreso --> -->
+          </div>
+        </div>
+
+        <!-- ================================================================
+             SECCIÓN: Continue Watching (grid / carousel horizontal)
+           ================================================================ -->
+        <section class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6 lg:p-8 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <h2 class="font-semibold text-gray-900">Continue Watching</h2>
+            </div>
+            <a href="#" class="text-sm font-medium text-blue-600 hover:underline">Ver todo</a>
+          </div>
+          <div class="p-4 lg:p-6">
+            <!-- Carrusel horizontal de tarjetas de curso -->
+            <div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+              <!-- Tarjeta de curso 1 -->
+              <div class="min-w-[200px] bg-gray-50 rounded-2xl border border-gray-200 p-4 flex-shrink-0">
+                <!-- <!-- Card de Curso: thumbnail, título, progreso --> -->
+              </div>
+              <!-- Tarjeta de curso 2 -->
+              <div class="min-w-[200px] bg-gray-50 rounded-2xl border border-gray-200 p-4 flex-shrink-0">
+                <!-- <!-- Card de Curso: thumbnail, título, progreso --> -->
+              </div>
+              <!-- Tarjeta de curso 3 -->
+              <div class="min-w-[200px] bg-gray-50 rounded-2xl border border-gray-200 p-4 flex-shrink-0">
+                <!-- <!-- Card de Curso: thumbnail, título, progreso --> -->
+              </div>
+              <!-- Tarjeta de curso 4 -->
+              <div class="min-w-[200px] bg-gray-50 rounded-2xl border border-gray-200 p-4 flex-shrink-0">
+                <!-- <!-- Card de Curso: thumbnail, título, progreso --> -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             SECCIÓN: Your Lesson (tabla / lista de lecciones)
+           ================================================================ -->
+        <section class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6 lg:p-8 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h2 class="font-semibold text-gray-900">Your Lesson</h2>
+            <a href="#" class="text-sm font-medium text-blue-600 hover:underline">Ver todo</a>
+          </div>
+          <div class="p-4 lg:p-6">
+            <!-- Tabla / lista de lecciones -->
+            <div class="overflow-x-auto no-scrollbar">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-gray-100">
+                    <th class="pb-3 text-xs font-semibold text-gray-400 uppercase">Lección</th>
+                    <th class="pb-3 text-xs font-semibold text-gray-400 uppercase">Duración</th>
+                    <th class="pb-3 text-xs font-semibold text-gray-400 uppercase">Estado</th>
+                    <th class="pb-3 text-xs font-semibold text-gray-400 uppercase text-right">Acción</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <!-- Fila de lección 1 -->
+                  <tr class="group">
+                    <td class="py-4 text-gray-900 font-medium">Introducción al diseño</td>
+                    <td class="py-4 text-gray-500 text-sm">12:00</td>
+                    <td class="py-4">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                        Completado
+                      </span>
+                    </td>
+                    <td class="py-4 text-right">
+                      <!-- <!-- Botón continuar / ver --> -->
+                    </td>
+                  </tr>
+                  <!-- Fila de lección 2 -->
+                  <tr class="group">
+                    <td class="py-4 text-gray-900 font-medium">Tailwind CSS fundamentals</td>
+                    <td class="py-4 text-gray-500 text-sm">28:00</td>
+                    <td class="py-4">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-100">
+                        <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+                        En progreso
+                      </span>
+                    </td>
+                    <td class="py-4 text-right">
+                      <!-- <!-- Botón continuar / ver --> -->
+                    </td>
+                  </tr>
+                  <!-- Fila de lección 3 -->
+                  <tr class="group">
+                    <td class="py-4 text-gray-900 font-medium">Responsive layouts</td>
+                    <td class="py-4 text-gray-500 text-sm">18:00</td>
+                    <td class="py-4">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-gray-400 border border-gray-200">
+                        <span class="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
+                        Pendiente
+                      </span>
+                    </td>
+                    <td class="py-4 text-right">
+                      <!-- <!-- Botón iniciar --> -->
+                    </td>
+                  </tr>
+                  <!-- Fila de lección 4 -->
+                  <tr class="group">
+                    <td class="py-4 text-gray-900 font-medium">JavaScript interactivo</td>
+                    <td class="py-4 text-gray-500 text-sm">35:00</td>
+                    <td class="py-4">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-gray-400 border border-gray-200">
+                        <span class="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
+                        Pendiente
+                      </span>
+                    </td>
+                    <td class="py-4 text-right">
+                      <!-- <!-- Botón iniciar --> -->
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- ------------------------------------------------------------------
+         SIDEBAR DERECHO - Panel Statistic (solo Desktop lg)
+         En Tablet/Mobile se muestra al final (apilado) más abajo.
+       ------------------------------------------------------------------ -->
+    <aside class="hidden lg:flex lg:w-80 flex-col border-l border-gray-200 bg-white z-10">
+      <div class="p-6 lg:p-8 space-y-6">
+        <!-- Statistic: Perfil con avatar -->
+        <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5">
+          <!-- <!-- Perfil: avatar, nombre, rol, stats rápidas --> -->
+        </div>
+
+        <!-- Statistic: Gráfico de barras -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+          <!-- <!-- Gráfico de barras (placeholder) --> -->
+        </div>
+
+        <!-- Statistic: Your mentor -->
+        <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5">
+          <!-- <!-- Tu mentor: avatar, nombre, especialidad, botón contacto --> -->
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ------------------------------------------------------------------
+       SIDEBAR DERECHO - Versión Tablet / Mobile (apilado al final)
+       Se oculta en Desktop (lg) porque ya está al lado.
+     ------------------------------------------------------------------ -->
+  <aside class="lg:hidden bg-gray-100 p-4 space-y-6 mt-6">
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 space-y-6">
+      <!-- Perfil con avatar -->
+      <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5">
+        <!-- <!-- Perfil: avatar, nombre, rol, stats rápidas --> -->
+      </div>
+      <!-- Gráfico de barras -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+        <!-- <!-- Gráfico de barras (placeholder) --> -->
+      </div>
+      <!-- Your mentor -->
+      <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5">
+        <!-- <!-- Tu mentor: avatar, nombre, especialidad, botón contacto --> -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================================================================
+       SCRIPTS - Funcionalidad básica del drawer móvil
+     ================================================================ -->
+  <script>
+    const leftSidebar = document.getElementById('leftSidebar');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const btnOpen = document.getElementById('btnOpenSidebar');
+
+    function openLeftSidebar() {
+      leftSidebar.classList.remove('-translate-x-full');
+      leftSidebar.classList.add('translate-x-0');
+      mobileOverlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLeftSidebar() {
+      leftSidebar.classList.remove('translate-x-0');
+      leftSidebar.classList.add('-translate-x-full');
+      mobileOverlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Cerrar drawer al redimensionar a desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        closeLeftSidebar();
+      }
+    });
+  </script>
+</body>
+</html>
