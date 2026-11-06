@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Coursue - E-learning Dashboard",
-  description: "Panel de administración de plataforma de cursos en línea",
+  title: "Librería San Pablo",
+  description: "Tienda en línea de libros, biblias y artículos religiosos",
 };
 
 export default function RootLayout({
