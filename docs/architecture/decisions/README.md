@@ -20,6 +20,14 @@ Todos los archivos de decisión siguen el formato `ADR-<NNN>-<titulo-kebab-case>
 | ADR-P02 | Autenticación y autorización en endpoints de escritura de NestJS | ACCEPTED | Protege `POST/PATCH/DELETE /products`; lectura pública limitada | `ADR-P02-auth-write-endpoints.md` |
 | ADR-P03 | Eliminación lógica de productos (soft delete) | ACCEPTED | No se permite eliminación física en endpoints ordinarios del catálogo | `ADR-P03-logical-deletion.md` |
 | ADR-P04 | Mecanismo persistente de sincronización pendiente | ACCEPTED | Reintentos diferidos, registro de errores y reconciliación Payload → PostgreSQL | `ADR-P04-pending-sync-queue.md` |
+| ADR-P05 | Modelo Category en PostgreSQL mediante Prisma | ACCEPTED | Nueva tabla `Category` con clave foránea desde `Product` | `ADR-P05-category-model-prisma.md` |
+| ADR-P06 | Relacionar Product con Category mediante categoryId | ACCEPTED | `categoryId Int?` como FK opcional en `Product` | `ADR-P06-product-category-relationship.md` |
+| ADR-P07 | payloadId para identificación de categorías en sync | ACCEPTED | Campo `payloadId Int @unique` en `Category` para upsert idempotente | `ADR-P07-payloadid-category-sync.md` |
+| ADR-P08 | categoryId nullable durante la migración | ACCEPTED | `Int?` temporal, luego se convierte a obligatorio tras asignar categorías | `ADR-P08-categoryid-nullable-migration.md` |
+| ADR-P09 | Impedir eliminar categorías con productos asociados | ACCEPTED | Validación en NestJS + `ON DELETE RESTRICT` en PostgreSQL | `ADR-P09-prevent-delete-category-with-products.md` |
+| ADR-P10 | Módulo independiente categories en NestJS | ACCEPTED | `CategoriesModule` con controlador, servicio y DTOs propios | `ADR-P10-categories-module-nestjs.md` |
+| ADR-P11 | Sincronizar categorías antes de productos | ACCEPTED | Worker de outbox procesa categorías antes que productos | `ADR-P11-sync-categories-before-products.md` |
+| ADR-P12 | Next.js consulta categorías vía NestJS | ACCEPTED | `getCategories()` llama a `GET /api/v1/categories` de NestJS | `ADR-P12-nextjs-categories-via-nestjs.md` |
 
 ## Decisiones pendientes de aprobación
 
@@ -27,7 +35,7 @@ Todos los archivos de decisión siguen el formato `ADR-<NNN>-<titulo-kebab-case>
 |----|--------|--------|---------|
 | — | — | — | No hay decisiones pendientes en este momento |
 
-Todas las decisiones identificadas hasta la fecha han sido aprobadas (ADR-P01 a ADR-P04).
+Todas las decisiones identificadas hasta la fecha han sido aprobadas (ADR-P01 a ADR-P12).
 
 ## Cómo agregar una nueva decisión
 

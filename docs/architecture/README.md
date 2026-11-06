@@ -45,6 +45,14 @@ El proyecto es un monorepo (pnpm) con tres aplicaciones:
 | ADR-P02 | Autenticación y autorización en endpoints de escritura de NestJS | ACCEPTED | `decisions/ADR-P02-auth-write-endpoints.md` |
 | ADR-P03 | Eliminación lógica de productos (soft delete) | ACCEPTED | `decisions/ADR-P03-logical-deletion.md` |
 | ADR-P04 | Mecanismo persistente de sincronización pendiente | ACCEPTED | `decisions/ADR-P04-pending-sync-queue.md` |
+| ADR-P05 | Modelo Category en PostgreSQL mediante Prisma | ACCEPTED | `decisions/ADR-P05-category-model-prisma.md` |
+| ADR-P06 | Relacionar Product con Category mediante categoryId | ACCEPTED | `decisions/ADR-P06-product-category-relationship.md` |
+| ADR-P07 | payloadId para identificación de categorías en sync | ACCEPTED | `decisions/ADR-P07-payloadid-category-sync.md` |
+| ADR-P08 | categoryId nullable durante la migración | ACCEPTED | `decisions/ADR-P08-categoryid-nullable-migration.md` |
+| ADR-P09 | Impedir eliminar categorías con productos asociados | ACCEPTED | `decisions/ADR-P09-prevent-delete-category-with-products.md` |
+| ADR-P10 | Módulo independiente categories en NestJS | ACCEPTED | `decisions/ADR-P10-categories-module-nestjs.md` |
+| ADR-P11 | Sincronizar categorías antes de productos | ACCEPTED | `decisions/ADR-P11-sync-categories-before-products.md` |
+| ADR-P12 | Next.js consulta categorías vía NestJS | ACCEPTED | `decisions/ADR-P12-nextjs-categories-via-nestjs.md` |
 
 ## Convenciones
 

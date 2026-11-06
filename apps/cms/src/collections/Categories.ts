@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { syncCategoryToNestJS } from "../sync/nestjs-sync";
 
 export const Categories: CollectionConfig = {
   slug: "categories",
@@ -38,4 +39,27 @@ export const Categories: CollectionConfig = {
       required: false,
     },
   ],
+  hooks: {
+    afterChange: [
+      // Sincronización unidireccional Payload → NestJS tras crear o actualizar.
+      // Los errores se capturan y registran con contexto sin fallar la operación en el CMS.
+      async ({ operation, data, doc }) => {
+        if (operation === "create" || operation === "update") {
+          try {
+            await syncCategoryToNestJS({
+              payloadId: doc?.id ?? data.id,
+              name: data.name,
+              slug: data.slug,
+              description: data.description ?? null,
+            });
+          } catch (error) {
+            console.error(
+              `[Payload→NestJS] Error en afterChange de categorías (${operation}, categoryId=${doc?.id ?? data?.id}):`,
+              error instanceof Error ? error.message : String(error),
+            );
+          }
+        }
+      },
+    ],
+  },
 };

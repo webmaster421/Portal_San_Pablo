@@ -15,6 +15,7 @@ export interface SyncProductInput {
   price: number;
   imageUrl?: string | null;
   categoryName?: string | null;
+  categoryPayloadId?: number | null;
   weight?: number | null;
   width?: number | null;
   height?: number | null;
@@ -48,6 +49,23 @@ export class SyncService {
    */
   async upsertProduct(data: SyncProductInput) {
     try {
+      // Resolver categoryId a partir de categoryPayloadId si se proporciona.
+      // Si la categoría no existe en PostgreSQL, se deja categoryId=null y se registra advertencia.
+      let categoryId: number | null = null;
+      if (data.categoryPayloadId !== undefined && data.categoryPayloadId !== null) {
+        const category = await this.prisma.category.findUnique({
+          where: { payloadId: data.categoryPayloadId },
+          select: { id: true },
+        });
+        if (category) {
+          categoryId = category.id;
+        } else {
+          this.logger.warn(
+            `Categoría con payloadId=${data.categoryPayloadId} no encontrada en PostgreSQL. Producto payloadId=${data.payloadId} se sincronizará sin categoría (categoryId=null).`,
+          );
+        }
+      }
+
       const result = await this.prisma.product.upsert({
         where: { payloadId: data.payloadId },
         update: {
@@ -58,6 +76,7 @@ export class SyncService {
           price: data.price,
           imageUrl: data.imageUrl ?? null,
           categoryName: data.categoryName ?? null,
+          categoryId,
           weight: data.weight ?? null,
           width: data.width ?? null,
           height: data.height ?? null,
@@ -85,6 +104,7 @@ export class SyncService {
           price: data.price,
           imageUrl: data.imageUrl ?? null,
           categoryName: data.categoryName ?? null,
+          categoryId,
           weight: data.weight ?? null,
           width: data.width ?? null,
           height: data.height ?? null,

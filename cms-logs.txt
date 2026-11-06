@@ -1,0 +1,131 @@
+
+> @portal/cms@0.0.0 dev C:\dev\SanPablo\apps\cms
+> cross-env NODE_OPTIONS=--no-deprecation next dev -p 3001
+
+▲ Next.js 16.4.0 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.0.21:3001
+- Environments: .env
+✓ Ready in 360ms
+✓ Running next.config.ts took 31ms
+- Experiments (use with caution):
+  ⨯ turbopackServerFastRefresh
+
+⚠ Your version of Next.js is affected by a known security vulnerability. This command is continuing after the upgrade reminder.
+Reference: https://registry.npmjs.org/-/npm/v1/security/advisories/bulk
+[⣷] Pulling schema from database...
+[2K[1G[✓] Pulling schema from database...
+[08:02:49] [33mWARN[39m: [36mNo email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.[39m
+ GET /admin/collections/categories?depth=1&limit=10 200 in 4.3s (next.js: 1848ms, application-code: 2.5s)
+ GET /api/payload-preferences/nav 200 in 1740ms (next.js: 1643ms, application-code: 97ms)
+ GET /api/users/me 200 in 1864ms (next.js: 1766ms, application-code: 98ms)
+ GET /api/users/me 200 in 13ms (next.js: 7ms, application-code: 6ms)
+ POST /api/users/login 200 in 186ms (next.js: 10ms, application-code: 176ms)
+ POST /api/categories 201 in 25ms (next.js: 1.1ms, application-code: 24ms)
+ PATCH /api/categories/3 200 in 30ms (next.js: 6ms, application-code: 24ms)
+ GET /admin/collections/categories?depth=1&limit=10 200 in 318ms (next.js: 20ms, application-code: 297ms)
+ GET /api/users/me 200 in 18ms (next.js: 7ms, application-code: 11ms)
+ GET /api/users/me 200 in 10ms (next.js: 1.0ms, application-code: 9ms)
+ GET /api/payload-preferences/nav 200 in 11ms (next.js: 3ms, application-code: 8ms)
+ DELETE /api/categories?limit=0&where%5Band%5D%5B0%5D%5Bid%5D%5Bin%5D%5B0%5D=3 200 in 22ms (next.js: 6ms, application-code: 16ms)
+ GET /admin/collections/categories?depth=1&limit=10&page=1 200 in 231ms (next.js: 7ms, application-code: 224ms)
+ GET /admin/collections/categories?depth=1&limit=10&page=1 200 in 161ms (next.js: 1.4ms, application-code: 160ms)
+ DELETE /api/categories?limit=0&where%5Band%5D%5B0%5D%5Bid%5D%5Bin%5D%5B0%5D=2&where%5Band%5D%5B0%5D%5Bid%5D%5Bin%5D%5B1%5D=1 200 in 29ms (next.js: 7ms, application-code: 22ms)
+ GET /admin/collections/categories?depth=1&limit=10&page=1 200 in 178ms (next.js: 9ms, application-code: 169ms)
+ GET /admin/collections/categories?depth=1&limit=10&page=1 200 in 102ms (next.js: 1.7ms, application-code: 100ms)
+ GET /admin/collections/categories/create 200 in 88ms (next.js: 6ms, application-code: 82ms)
+ GET /api/payload-preferences/collection-categories 200 in 21ms (next.js: 10ms, application-code: 11ms)
+ GET /api/payload-preferences/undefined 200 in 12ms (next.js: 6ms, application-code: 6ms)
+ POST /admin/collections/categories/create 200 in 18ms (next.js: 5ms, application-code: 13ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"categories","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 5ms src/app/(payload)/layout.tsx
+ POST /admin/collections/categories/create 200 in 14ms (next.js: 0.7ms, application-code: 13ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"categories","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 8ms src/app/(payload)/layout.tsx
+ POST /admin/collections/categories/create 200 in 16ms (next.js: 8ms, application-code: 8ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"categories","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 3ms src/app/(payload)/layout.tsx
+ POST /admin/collections/categories/create 200 in 14ms (next.js: 0.7ms, application-code: 14ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"categories","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 8ms src/app/(payload)/layout.tsx
+ POST /admin/collections/categories/create 200 in 29ms (next.js: 6ms, application-code: 23ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"categories","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 18ms src/app/(payload)/layout.tsx
+ POST /admin/collections/categories/create 200 in 8ms (next.js: 0.8ms, application-code: 7ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"categories","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 4ms src/app/(payload)/layout.tsx
+ POST /admin/collections/categories/create 200 in 29ms (next.js: 6ms, application-code: 23ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"categories","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 17ms src/app/(payload)/layout.tsx
+ POST /admin/collections/categories/create 200 in 14ms (next.js: 6ms, application-code: 8ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"categories","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 4ms src/app/(payload)/layout.tsx
+ POST /api/categories?depth=0&fallback-locale=null 201 in 2.1s (next.js: 6ms, application-code: 2.1s)
+ GET /admin/collections/categories/1 200 in 105ms (next.js: 10ms, application-code: 95ms)
+ GET /admin/collections/products 200 in 83ms (next.js: 6ms, application-code: 77ms)
+ GET /admin/collections/users 200 in 87ms (next.js: 1.0ms, application-code: 86ms)
+ GET /admin/collections/products 200 in 88ms (next.js: 7ms, application-code: 81ms)
+ GET /admin/collections/products/create 200 in 96ms (next.js: 7ms, application-code: 89ms)
+ GET /api/payload-preferences/collection-products 200 in 17ms (next.js: 7ms, application-code: 10ms)
+ POST /admin/collections/products/create 200 in 27ms (next.js: 6ms, application-code: 21ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 15ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 13ms (next.js: 0.7ms, application-code: 13ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 8ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 30ms (next.js: 6ms, application-code: 24ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 18ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 13ms (next.js: 0.8ms, application-code: 12ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 7ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 28ms (next.js: 6ms, application-code: 22ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 17ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 10ms (next.js: 0.7ms, application-code: 9ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 5ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 14ms (next.js: 6ms, application-code: 8ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 4ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 10ms (next.js: 0.8ms, application-code: 10ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 5ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 22ms (next.js: 6ms, application-code: 16ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"media","drawerSlug":"doc-drawer_media_1__r_i_","fallbackLocale":false,"...":"4 items not stringified"},"name":"render-document"}) in 9ms src/app/(payload)/layout.tsx
+ GET /api/payload-preferences/collection-media 200 in 16ms (next.js: 8ms, application-code: 8ms)
+ POST /admin/collections/products/create 200 in 14ms (next.js: 6ms, application-code: 8ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"media","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 3ms src/app/(payload)/layout.tsx
+ POST /api/media?depth=0&fallback-locale=null 201 in 29ms (next.js: 6ms, application-code: 23ms)
+ POST /api/media 200 in 9ms (next.js: 0.8ms, application-code: 8ms)
+ POST /admin/collections/products/create 200 in 21ms (next.js: 0.6ms, application-code: 20ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"media","docID":13,"drawerSlug":"doc-drawer_media_1__r_i_","...":"5 items not stringified"},"name":"render-document"}) in 12ms src/app/(payload)/layout.tsx
+ GET /api/media/file/PAN%20EBOOK%20COL%20DIC%202026.jpg?2026-11-06T14%3A34%3A01.542Z 200 in 28ms (next.js: 0.7ms, application-code: 27ms)
+ POST /admin/collections/products/create 200 in 12ms (next.js: 0.9ms, application-code: 11ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 6ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 28ms (next.js: 6ms, application-code: 22ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 14ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 32ms (next.js: 7ms, application-code: 25ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 20ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 14ms (next.js: 6ms, application-code: 8ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 3ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 11ms (next.js: 1.0ms, application-code: 10ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 4ms src/app/(payload)/layout.tsx
+ POST /api/categories 200 in 11ms (next.js: 6ms, application-code: 6ms)
+ POST /admin/collections/products/create 200 in 28ms (next.js: 6ms, application-code: 23ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 18ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 17ms (next.js: 6ms, application-code: 11ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 7ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 13ms (next.js: 6ms, application-code: 7ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 3ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 11ms (next.js: 0.7ms, application-code: 10ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 6ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 28ms (next.js: 6ms, application-code: 22ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 16ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 12ms (next.js: 0.7ms, application-code: 12ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 7ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 17ms (next.js: 6ms, application-code: 11ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 4ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 26ms (next.js: 8ms, application-code: 18ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 13ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 30ms (next.js: 6ms, application-code: 24ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 19ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 29ms (next.js: 5ms, application-code: 23ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 18ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 29ms (next.js: 6ms, application-code: 23ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 18ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 16ms (next.js: 6ms, application-code: 10ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 6ms src/app/(payload)/layout.tsx
+ POST /admin/collections/products/create 200 in 28ms (next.js: 6ms, application-code: 22ms)
+  └─ ƒ <inline action>({"args":{"collectionSlug":"products","docPermissions":"[Object]","docPreferences":null,"...":"9 items not stringified"},"name":"form-state"}) in 17ms src/app/(payload)/layout.tsx
+ POST /api/products?depth=0&fallback-locale=null 201 in 47ms (next.js: 7ms, application-code: 40ms)
+ GET /admin/collections/products/1 200 in 96ms (next.js: 7ms, application-code: 89ms)
+ POST /api/media 200 in 8ms (next.js: 0.8ms, application-code: 7ms)
+ POST /api/media 200 in 9ms (next.js: 0.7ms, application-code: 8ms)
+ POST /api/categories 200 in 6ms (next.js: 0.7ms, application-code: 6ms)
+[?25h
+ ELIFECYCLE  Command failed with exit code 1.

@@ -124,6 +124,10 @@ export function mapPayloadProductToSync(data: any): Record<string, unknown> {
       typeof category === "object" && category !== null && "name" in category
         ? (category as { name?: string }).name
         : null,
+    categoryPayloadId:
+      typeof category === "object" && category !== null
+        ? (category as { id?: number }).id ?? null
+        : null,
     weight: data.weight ?? null,
     width: dimensions?.width ?? null,
     height: dimensions?.height ?? null,
@@ -166,4 +170,18 @@ export async function deactivateProductInNestJS(
   const body = JSON.stringify({});
   const url = `${getApiUrl()}/api/v1/sync/products/${payloadId}/deactivate`;
   await requestWithRetry(url, "PATCH", body);
+}
+
+/**
+ * Envía una categoría creada o actualizada a NestJS (upsert idempotente por payloadId).
+ * Reintenta internamente mediante requestWithRetry. Si falla tras agotar los
+ * reintentos, lanza el error para que el hook de Payload lo registre con contexto.
+ * No interrumpe la operación en el CMS: el hook atrapará y registrará el error.
+ */
+export async function syncCategoryToNestJS(
+  payload: Record<string, unknown>,
+): Promise<void> {
+  const body = JSON.stringify(payload);
+  const url = `${getApiUrl()}/api/v1/sync/categories`;
+  await requestWithRetry(url, "POST", body);
 }
