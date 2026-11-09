@@ -398,7 +398,7 @@ export const Products: CollectionConfig = {
       // - Los errores se registran con contexto para facilitar depuración.
       async ({ id }) => {
         try {
-          await deactivateProductInNestJS(id);
+          await deactivateProductInNestJS(Number(id));
         } catch (error) {
           console.error(
             `[Payload→NestJS] Error en afterDelete (payloadId=${id}):`,

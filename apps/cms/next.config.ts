@@ -8,6 +8,9 @@ const dirname = path.dirname(__filename);
 
 const nextConfig: NextConfig = {
   agentRules: false,
+  experimental: {
+    agentUpgrade: "security",
+  },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       ".cjs": [".cts", ".cjs"],
