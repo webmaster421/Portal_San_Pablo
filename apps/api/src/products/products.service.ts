@@ -21,12 +21,13 @@ export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Lista todos los productos.
-   * Nota: el filtrado por status="published" y visible=true se añadirá cuando
-   * se definan formalmente los estados comerciales. Por ahora devuelve todos.
+   * Lista productos para el catálogo público.
+   * Devuelve exclusivamente productos publicados y visibles.
+   * Los borradores y productos ocultos no se exponen públicamente.
    */
   async findAll() {
     return this.prisma.product.findMany({
+      where: { status: "published", visible: true },
       orderBy: { createdAt: "desc" },
     });
   }
@@ -97,9 +98,10 @@ export class ProductService {
   }
 
   /**
-   * Eliminación segura de un producto.
-   * Valida existencia antes de eliminar: no borra indiscriminadamente.
-   * Devuelve un indicador booleano de eliminación exitosa.
+   * Eliminación lógica de un producto (soft delete).
+   * Valida existencia antes de desactivar: no borra físicamente.
+   * Pone visible=false y status='draft', preservando el registro histórico.
+   * Devuelve un indicador de desactivación exitosa.
    */
   async remove(id: number) {
     const existing = await this.prisma.product.findUnique({ where: { id } });
@@ -107,8 +109,9 @@ export class ProductService {
       throw new NotFoundException(`Producto con id ${id} no encontrado`);
     }
 
-    await this.prisma.product.delete({
+    await this.prisma.product.update({
       where: { id },
+      data: { visible: false, status: "draft" },
     });
 
     return { deleted: true, id };

@@ -9,10 +9,12 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  UseGuards,
 } from "@nestjs/common";
 import { ProductService } from "./products.service";
 import type { CreateProductDto } from "./dto/create-product.dto";
 import type { UpdateProductDto } from "./dto/update-product.dto";
+import { AdminApiKeyGuard } from "../common/guards/admin-api-key.guard";
 
 /**
  * Controlador de productos.
@@ -54,7 +56,9 @@ export class ProductController {
   }
 
   /// Creación de producto (POST /api/v1/products)
+  /// Protegida: solo accesible con API key administrativa.
   @Post()
+  @UseGuards(AdminApiKeyGuard)
   async create(@Body() data: CreateProductDto) {
     // Validación básica de campos obligatorios
     if (!data.title || !data.slug || !data.isbn || !data.author) {
@@ -77,7 +81,9 @@ export class ProductController {
   }
 
   /// Actualización de producto (PATCH /api/v1/products/:id)
+  /// Protegida: solo accesible con API key administrativa.
   @Patch(":id")
+  @UseGuards(AdminApiKeyGuard)
   async update(@Param("id") id: string, @Body() data: UpdateProductDto) {
     const idNum = Number(id);
     if (!Number.isFinite(idNum)) {
@@ -95,8 +101,10 @@ export class ProductController {
     return this.productService.update(idNum, data);
   }
 
-  /// Eliminación segura de producto (DELETE /api/v1/products/:id)
+  /// Eliminación lógica de producto (DELETE /api/v1/products/:id)
+  /// Protegida: solo accesible con API key administrativa.
   @Delete(":id")
+  @UseGuards(AdminApiKeyGuard)
   async remove(@Param("id") id: string) {
     const idNum = Number(id);
     if (!Number.isFinite(idNum)) {
