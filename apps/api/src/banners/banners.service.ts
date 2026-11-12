@@ -24,6 +24,7 @@ export class BannersService {
         update: {
           title: data.title,
           imageUrl: data.imageUrl ?? null,
+          mobileImageUrl: data.mobileImageUrl ?? null,
           alt: data.alt ?? null,
           link: data.link ?? null,
           active: data.active ?? true,
@@ -33,6 +34,7 @@ export class BannersService {
           payloadId: data.payloadId,
           title: data.title,
           imageUrl: data.imageUrl ?? null,
+          mobileImageUrl: data.mobileImageUrl ?? null,
           alt: data.alt ?? null,
           link: data.link ?? null,
           active: data.active ?? true,

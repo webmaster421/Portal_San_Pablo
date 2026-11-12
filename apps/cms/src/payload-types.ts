@@ -271,9 +271,13 @@ export interface Banner {
    */
   title: string;
   /**
-   * Imagen que se mostrará en el carrusel principal.
+   * Imagen que se mostrará en el carrusel principal (escritorio).
    */
   image: number | Media;
+  /**
+   * Imagen opcional para dispositivos móviles. Si no se especifica, se usa la imagen principal.
+   */
+  mobileImage?: (number | null) | Media;
   /**
    * Texto alternativo de la imagen para accesibilidad.
    */
@@ -472,6 +476,7 @@ export interface ProductsSelect<T extends boolean = true> {
 export interface BannersSelect<T extends boolean = true> {
   title?: T;
   image?: T;
+  mobileImage?: T;
   alt?: T;
   link?: T;
   active?: T;

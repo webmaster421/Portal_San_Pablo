@@ -28,4 +28,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPayload(nextConfig, { devBundleServerPackages: true });
+export default withPayload(nextConfig, { devBundleServerPackages: false });

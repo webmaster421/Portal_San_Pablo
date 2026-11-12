@@ -30,7 +30,17 @@ export const Banners: CollectionConfig = {
       required: true,
       label: "Imagen",
       admin: {
-        description: "Imagen que se mostrará en el carrusel principal.",
+        description: "Imagen que se mostrará en el carrusel principal (escritorio).",
+      },
+    },
+    {
+      name: "mobileImage",
+      type: "upload",
+      relationTo: "media",
+      required: false,
+      label: "Imagen móvil",
+      admin: {
+        description: "Imagen opcional para dispositivos móviles. Si no se especifica, se usa la imagen principal.",
       },
     },
     {
@@ -78,6 +88,7 @@ export const Banners: CollectionConfig = {
         if (operation === "create" || operation === "update") {
           try {
             let imageUrl: string | null = null;
+            let mobileImageUrl: string | null = null;
 
             if (data.image) {
               // data.image puede ser el ID numérico del documento Media o
@@ -109,10 +120,37 @@ export const Banners: CollectionConfig = {
               }
             }
 
+            if (data.mobileImage) {
+              if (
+                typeof data.mobileImage === "object" &&
+                data.mobileImage !== null &&
+                !Array.isArray(data.mobileImage) &&
+                "url" in data.mobileImage
+              ) {
+                mobileImageUrl = (data.mobileImage as { url?: string }).url ?? null;
+              } else {
+                try {
+                  const media = await req.payload.findByID({
+                    collection: "media",
+                    id: data.mobileImage as number,
+                  });
+                  const mediaUrl = media.url ?? null;
+                  if (mediaUrl) {
+                    mobileImageUrl = mediaUrl.startsWith("http")
+                      ? mediaUrl
+                      : `http://localhost:${process.env.PORT ?? 3001}${mediaUrl}`;
+                  }
+                } catch {
+                  // Si no se puede resolver el medio, se deja mobileImageUrl como null.
+                }
+              }
+            }
+
             await syncBannerToNestJS({
               payloadId: doc?.id ?? data.id,
               title: data.title,
               imageUrl,
+              mobileImageUrl,
               alt: data.alt ?? null,
               link: data.link ?? null,
               active: data.active ?? true,

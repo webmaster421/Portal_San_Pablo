@@ -63,16 +63,17 @@ model Product {
 }
 
 model Banner {
-  id        Int      @id @default(autoincrement())
-  payloadId Int      @unique
-  title     String
-  imageUrl  String?
-  alt       String?
-  link      String?
-  active    Boolean  @default(true)
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  payloadId     Int      @unique
+  title         String
+  imageUrl      String?
+  mobileImageUrl String?
+  alt           String?
+  link          String?
+  active        Boolean  @default(true)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@index([payloadId])
   @@index([active])

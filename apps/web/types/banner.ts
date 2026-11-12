@@ -7,6 +7,7 @@ export interface Banner {
   payloadId: number;
   title: string;
   imageUrl: string | null;
+  mobileImageUrl: string | null;
   alt: string | null;
   link: string | null;
   active: boolean;

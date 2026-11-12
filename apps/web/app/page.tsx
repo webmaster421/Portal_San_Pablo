@@ -28,6 +28,7 @@ interface Banner {
   id: number;
   title: string;
   imageUrl: string | null;
+  mobileImageUrl: string | null;
   alt: string | null;
   link: string | null;
   active: boolean;
@@ -89,14 +90,35 @@ export default function DashboardPage() {
   const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL ?? "";
 
   const renderBannerImage = (banner: Banner) => {
-    if (banner.imageUrl) {
-      // Asegurar URL absoluta: si es relativa, prefijar con la URL del CMS
-      const imageUrl = banner.imageUrl.startsWith("http")
+    const imageUrl = banner.imageUrl
+      ? banner.imageUrl.startsWith("http")
         ? banner.imageUrl
-        : `${cmsUrl}${banner.imageUrl}`;
+        : `${cmsUrl}${banner.imageUrl}`
+      : null;
+    const mobileImageUrl = banner.mobileImageUrl
+      ? banner.mobileImageUrl.startsWith("http")
+        ? banner.mobileImageUrl
+        : `${cmsUrl}${banner.mobileImageUrl}`
+      : null;
+
+    if (!imageUrl && !mobileImageUrl) {
       return (
+        <div className="w-full h-full bg-white/20 rounded-lg flex items-center justify-center">
+          <span className="text-white/70 text-sm">{banner.title}</span>
+        </div>
+      );
+    }
+
+    return (
+      <picture>
+        {mobileImageUrl && (
+          <source
+            media="(max-width: 768px)"
+            srcSet={mobileImageUrl}
+          />
+        )}
         <Image
-          src={imageUrl}
+          src={imageUrl ?? mobileImageUrl ?? ""}
           alt={banner.alt ?? banner.title}
           className="w-full h-full object-cover rounded-xl"
           loading="lazy"
@@ -105,12 +127,7 @@ export default function DashboardPage() {
           sizes="(max-width: 768px) 100vw, 50vw"
           unoptimized
         />
-      );
-    }
-    return (
-      <div className="w-full h-full bg-white/20 rounded-lg flex items-center justify-center">
-        <span className="text-white/70 text-sm">{banner.title}</span>
-      </div>
+      </picture>
     );
   };
 
