@@ -71,6 +71,7 @@ export interface Config {
     categories: Category;
     media: Media;
     products: Product;
+    banners: Banner;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,6 +83,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    banners: BannersSelect<false> | BannersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -260,6 +262,39 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "banners".
+ */
+export interface Banner {
+  id: number;
+  /**
+   * Nombre interno del banner.
+   */
+  title: string;
+  /**
+   * Imagen que se mostrará en el carrusel principal.
+   */
+  image: number | Media;
+  /**
+   * Texto alternativo de la imagen para accesibilidad.
+   */
+  alt?: string | null;
+  /**
+   * URL de destino al hacer clic en el banner. Opcional.
+   */
+  link?: string | null;
+  /**
+   * Permite mostrar u ocultar el banner en el frontend.
+   */
+  active?: boolean | null;
+  /**
+   * Orden de aparición. Menor valor aparece primero.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -297,6 +332,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'banners';
+        value: number | Banner;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -423,6 +462,20 @@ export interface ProductsSelect<T extends boolean = true> {
   visible?: T;
   inventory?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "banners_select".
+ */
+export interface BannersSelect<T extends boolean = true> {
+  title?: T;
+  image?: T;
+  alt?: T;
+  link?: T;
+  active?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }

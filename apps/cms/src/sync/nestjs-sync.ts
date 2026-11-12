@@ -185,3 +185,30 @@ export async function syncCategoryToNestJS(
   const url = `${getApiUrl()}/api/v1/sync/categories`;
   await requestWithRetry(url, "POST", body);
 }
+
+/**
+ * Envía un banner creado o actualizado a NestJS (upsert idempotente por payloadId).
+ * Reintenta internamente mediante requestWithRetry. Si falla tras agotar los
+ * reintentos, lanza el error para que el hook de Payload lo registre con contexto.
+ * No interrumpe la operación en el CMS: el hook atrapará y registrará el error.
+ */
+export async function syncBannerToNestJS(
+  payload: Record<string, unknown>,
+): Promise<void> {
+  const body = JSON.stringify(payload);
+  const url = `${getApiUrl()}/api/v1/sync/banners`;
+  await requestWithRetry(url, "POST", body);
+}
+
+/**
+ * Desactiva lógicamente un banner en NestJS cuando se elimina de Payload.
+ * Nunca borra físicamente: pone active=false.
+ * Reintenta internamente mediante requestWithRetry. Si falla, lanza el error.
+ */
+export async function deactivateBannerInNestJS(
+  payloadId: number,
+): Promise<void> {
+  const body = JSON.stringify({});
+  const url = `${getApiUrl()}/api/v1/sync/banners/${payloadId}/deactivate`;
+  await requestWithRetry(url, "PATCH", body);
+}

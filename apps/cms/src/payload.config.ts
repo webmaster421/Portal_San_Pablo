@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 
 import { translations } from "@payloadcms/translations/all";
 
+import { Banners } from "./collections/Banners";
 import { Categories } from "./collections/Categories";
 import { Media } from "./collections/Media";
 import { Products } from "./collections/Products";
@@ -41,7 +42,7 @@ export default buildConfig({
     fallbackLanguage: "es",
     supportedLanguages: { es: translations.es },
   },
-  collections: [Users, Categories, Media, Products],
+  collections: [Users, Categories, Media, Products, Banners],
   editor: lexicalEditor(),
   secret: payloadSecret,
   typescript: {
