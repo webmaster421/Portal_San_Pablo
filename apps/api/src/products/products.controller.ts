@@ -45,6 +45,17 @@ export class ProductController {
     return product;
   }
 
+  /// Consulta productos por categoría (GET /api/v1/products/category/:categoryId)
+  /// Se define antes que :id para evitar conflictos de rutas.
+  @Get("category/:categoryId")
+  async findByCategory(@Param("categoryId") categoryId: string) {
+    const idNum = Number(categoryId);
+    if (!Number.isFinite(idNum)) {
+      throw new BadRequestException("El categoryId debe ser un número válido");
+    }
+    return this.productService.findByCategory(idNum);
+  }
+
   /// Consulta por ID (GET /api/v1/products/:id)
   @Get(":id")
   async findOne(@Param("id") id: string) {

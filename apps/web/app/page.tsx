@@ -193,7 +193,7 @@ export default function DashboardPage() {
                 {category.name}
               </h3>
 
-              <div className="flex items-center justify-between mt-3">
+              <div className="flex items-center justify-between ">
                 <span className="text-white/80 text-xs font-medium tracking-wide">
                   Ver productos
                 </span>

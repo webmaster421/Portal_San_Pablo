@@ -98,6 +98,22 @@ export class CategoryService {
   }
 
   /**
+   * Consulta una categoría por su slug.
+   * Lanza error si no existe.
+   */
+  async findBySlug(slug: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { slug },
+    });
+
+    if (!category) {
+      throw new Error(`Categoría con slug "${slug}" no encontrada`);
+    }
+
+    return category;
+  }
+
+  /**
    * Resuelve el ID interno de PostgreSQL de una categoría a partir de su payloadId.
    * Devuelve null si no existe.
    */

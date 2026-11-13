@@ -20,3 +20,16 @@ import { apiFetch } from "./api-client";
 export async function getCategories(): Promise<Category[]> {
   return apiFetch<Category[]>("/api/v1/categories");
 }
+
+/**
+ * Obtiene una categoría por su slug.
+ *
+ * Llama a `GET /api/v1/categories/slug/:slug` de la API central de NestJS.
+ *
+ * @param slug - Slug amigable de la categoría.
+ * @returns La categoría encontrada.
+ * @throws Error si la petición falla o la API responde con error (404 si no existe).
+ */
+export async function getCategoryBySlug(slug: string): Promise<Category> {
+  return apiFetch<Category>(`/api/v1/categories/slug/${slug}`);
+}

@@ -21,4 +21,5 @@ export {
   IconChevronRight,
   IconMenu,
   IconCart,
+  IconExpand,
 } from "./icons";

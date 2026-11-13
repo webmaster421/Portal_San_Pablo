@@ -376,16 +376,26 @@ export const Products: CollectionConfig = {
     afterChange: [
       // Sincronización unidireccional Payload → NestJS tras crear o actualizar.
       // - Solo se envían los campos comerciales necesarios.
+      // - Se rehidrata el documento con depth para resolver imagen y categoría (IDs → objetos con url/id/nombre).
       // - Los errores de red no fallan la operación en el CMS (se registran con contexto).
       // - No hay ciclo: NestJS no devuelve nada a Payload.
-      async ({ operation, data, doc }) => {
+      async ({ operation, doc, req }) => {
         if (operation === "create" || operation === "update") {
+          const payloadId = doc?.id;
           try {
-            const syncData = { ...data, id: doc?.id ?? data.id };
-            await syncProductToNestJS(mapPayloadProductToSync(syncData));
+            const sourceDoc =
+              payloadId !== undefined && payloadId !== null
+                ? await req.payload.findByID({
+                    collection: "products",
+                    id: payloadId,
+                    depth: 2,
+                  })
+                : doc;
+
+            await syncProductToNestJS(mapPayloadProductToSync(sourceDoc));
           } catch (error) {
             console.error(
-              `[Payload→NestJS] Error en afterChange (${operation}, payloadId=${doc?.id ?? data?.id}):`,
+              `[Payload→NestJS] Error en afterChange (${operation}, payloadId=${payloadId}):`,
               error instanceof Error ? error.message : String(error),
             );
           }

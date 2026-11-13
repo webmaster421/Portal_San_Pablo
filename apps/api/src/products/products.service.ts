@@ -59,6 +59,21 @@ export class ProductService {
   }
 
   /**
+   * Lista productos publicados y visibles de una categoría específica.
+   * Devuelve productos ordenados por fecha de creación descendente.
+   */
+  async findByCategory(categoryId: number) {
+    return this.prisma.product.findMany({
+      where: {
+        categoryId,
+        status: "published",
+        visible: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  /**
    * Crea un producto.
    * Maneja errores de unicidad (slug, isbn, payloadId) y los traduce a ConflictException.
    * No asigna campos internos (id, createdAt, updatedAt) de forma indiscriminada.

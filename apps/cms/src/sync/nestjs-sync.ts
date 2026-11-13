@@ -109,6 +109,34 @@ export function mapPayloadProductToSync(data: any): Record<string, unknown> {
   const category = data.category;
   const dimensions = data.dimensions;
 
+  const imageUrl =
+    typeof image === "string"
+      ? image
+      : typeof image === "object" && image !== null && "url" in image
+        ? (image as { url?: string | null }).url ?? null
+        : null;
+
+  const categoryName =
+    typeof category === "object" && category !== null && "name" in category
+      ? (category as { name?: string | null }).name ?? null
+      : null;
+
+  const categoryPayloadId =
+    typeof category === "number"
+      ? category
+      : typeof category === "string" && category.trim() !== "" && !Number.isNaN(Number(category))
+        ? Number(category)
+        : typeof category === "object" && category !== null && "id" in category
+          ? ((category as { id?: number | string | null }).id as number | string | null | undefined) ?? null
+          : null;
+
+  const normalizedCategoryPayloadId =
+    typeof categoryPayloadId === "number"
+      ? categoryPayloadId
+      : typeof categoryPayloadId === "string" && categoryPayloadId.trim() !== "" && !Number.isNaN(Number(categoryPayloadId))
+        ? Number(categoryPayloadId)
+        : null;
+
   return {
     payloadId: data.id,
     title: data.title,
@@ -116,18 +144,9 @@ export function mapPayloadProductToSync(data: any): Record<string, unknown> {
     isbn: data.isbn,
     author: data.author,
     price: data.price,
-    imageUrl:
-      typeof image === "object" && image !== null && "url" in image
-        ? (image as { url?: string }).url
-        : null,
-    categoryName:
-      typeof category === "object" && category !== null && "name" in category
-        ? (category as { name?: string }).name
-        : null,
-    categoryPayloadId:
-      typeof category === "object" && category !== null
-        ? (category as { id?: number }).id ?? null
-        : null,
+    imageUrl,
+    categoryName,
+    categoryPayloadId: normalizedCategoryPayloadId,
     weight: data.weight ?? null,
     width: dimensions?.width ?? null,
     height: dimensions?.height ?? null,

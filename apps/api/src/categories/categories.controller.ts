@@ -59,6 +59,14 @@ export class CategoriesController {
   /**
    * Consulta una categoría por su ID interno de PostgreSQL.
    */
+  @Get("slug/:slug")
+  async findBySlug(@Param("slug") slug: string) {
+    return this.categoryService.findBySlug(slug);
+  }
+
+  /**
+   * Consulta una categoría por su ID interno de PostgreSQL.
+   */
   @Get(":id")
   async findOne(@Param("id") id: string) {
     const idNum = Number(id);
