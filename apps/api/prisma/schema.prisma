@@ -18,13 +18,20 @@ model Category {
   payloadId   Int      @unique
   name        String
   slug        String   @unique
+  imageUrl    String?
   description String?
+  active      Boolean  @default(true)
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   products    Product[]
 
   @@index([payloadId])
   @@index([slug])
+  @@index([active])
+  @@index([featured])
+  @@index([order])
 }
 
 model Product {

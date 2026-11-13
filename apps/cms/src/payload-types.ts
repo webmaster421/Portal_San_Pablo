@@ -157,7 +157,23 @@ export interface Category {
   id: number;
   name: string;
   slug: string;
+  /**
+   * Imagen que se mostrará en la tarjeta de la categoría en el Home.
+   */
+  image?: (number | null) | Media;
   description?: string | null;
+  /**
+   * Indica si la categoría está publicada y puede mostrarse.
+   */
+  active?: boolean | null;
+  /**
+   * Indica si la categoría aparecerá en la sección principal del Home.
+   */
+  featured?: boolean | null;
+  /**
+   * Orden de aparición en el Home. Menor valor aparece primero.
+   */
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -413,7 +429,11 @@ export interface UsersSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  image?: T;
   description?: T;
+  active?: T;
+  featured?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }

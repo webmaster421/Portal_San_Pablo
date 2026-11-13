@@ -4,6 +4,8 @@ import {
   Body,
   UseGuards,
   BadRequestException,
+  Patch,
+  Param,
 } from "@nestjs/common";
 import { HmacAuthGuard } from "../products/sync/hmac-auth.guard";
 import { CategoryService } from "./categories.service";
@@ -42,6 +44,30 @@ export class CategorySyncController {
       payloadId: data.payloadId,
       categoryId: result.id,
       action: "upserted",
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Desactiva lógicamente una categoría en NestJS cuando se elimina de Payload.
+   * Pone active=false para evitar registros huérfanos.
+   */
+  @Patch("categories/:payloadId/deactivate")
+  @UseGuards(HmacAuthGuard)
+  async deactivateCategory(@Param("payloadId") payloadId: string) {
+    const payloadIdNum = Number(payloadId);
+    if (!Number.isFinite(payloadIdNum)) {
+      throw new BadRequestException("El payloadId debe ser un número válido");
+    }
+
+    const deactivated = await this.categoryService.deactivateCategory(
+      payloadIdNum,
+    );
+
+    return {
+      synced: true,
+      payloadId: payloadIdNum,
+      action: deactivated ? "deactivated" : "not_found",
       timestamp: new Date().toISOString(),
     };
   }

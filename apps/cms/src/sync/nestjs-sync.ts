@@ -173,6 +173,19 @@ export async function deactivateProductInNestJS(
 }
 
 /**
+ * Desactiva lógicamente una categoría en NestJS cuando se elimina de Payload.
+ * Nunca borra físicamente: pone active=false.
+ * Reintenta internamente mediante requestWithRetry. Si falla, lanza el error.
+ */
+export async function deactivateCategoryInNestJS(
+  payloadId: number,
+): Promise<void> {
+  const body = JSON.stringify({ active: false });
+  const url = `${getApiUrl()}/api/v1/sync/categories/${payloadId}/deactivate`;
+  await requestWithRetry(url, "PATCH", body);
+}
+
+/**
  * Envía una categoría creada o actualizada a NestJS (upsert idempotente por payloadId).
  * Reintenta internamente mediante requestWithRetry. Si falla tras agotar los
  * reintentos, lanza el error para que el hook de Payload lo registre con contexto.

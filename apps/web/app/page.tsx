@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { NavigationItem } from "@/types/navigation";
-import { friends, products } from "@/data/mock";
+import { friends } from "@/data/mock";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import {
@@ -13,13 +13,12 @@ import {
   IconLesson,
   IconTask,
   IconGroup,
-  IconHeart,
-  IconChevronLeft,
-  IconChevronRight,
   IconCart,
 } from "@/components/ui";
+import { getCategories } from "@/services/category.service";
+import type { Category } from "@/types/category";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import Image from "next/image";
@@ -60,6 +59,8 @@ export default function DashboardPage() {
 
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bannersLoading, setBannersLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -84,6 +85,18 @@ export default function DashboardPage() {
       .catch(() => {
         setBanners([]);
         setBannersLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    getCategories()
+      .then((data: Category[]) => {
+        setCategories(data);
+        setCategoriesLoading(false);
+      })
+      .catch(() => {
+        setCategories([]);
+        setCategoriesLoading(false);
       });
   }, []);
 
@@ -131,6 +144,70 @@ export default function DashboardPage() {
     );
   };
 
+  const renderCategoryCard = (category: Category) => {
+    const imageUrl = category.imageUrl
+      ? category.imageUrl.startsWith("http")
+        ? category.imageUrl
+        : `${cmsUrl}${category.imageUrl}`
+      : null;
+
+    return (
+      <Link
+        key={category.id}
+        href={`/categorias/${category.slug}`}
+        className="block"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        <article
+          className="group relative flex-shrink-0 w-[220px] sm:w-[250px] lg:w-[280px] aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer snap-start shadow-sm hover:shadow-xl transition-all duration-500"
+          >
+            {/* Imagen de fondo */}
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={category.name}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                width={280}
+                height={210}
+                unoptimized
+              />
+            ) : (
+              <div
+                className="absolute inset-0 w-full h-full bg-gray-200 flex items-center justify-center"
+              >
+                <span className="text-gray-400 text-sm">Sin imagen</span>
+              </div>
+            )}
+
+            {/* Degradado inferior para legibilidad */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+            {/* Contenido */}
+            <div className="absolute inset-x-0 bottom-0 z-10 p-4 lg:p-5">
+            
+
+              <h3 className="text-white font-semibold text-base lg:text-lg leading-snug line-clamp-2">
+                {category.name}
+              </h3>
+
+              <div className="flex items-center justify-between mt-3">
+                <span className="text-white/80 text-xs font-medium tracking-wide">
+                  Ver productos
+                </span>
+
+                <span className="flex items-center justify-center w-8 h-8 rounded-full border border-white/50 text-white transition-all duration-300 group-hover:bg-white group-hover:text-gray-900 group-hover:border-white group-hover:translate-x-1">
+                  →
+                </span>
+              </div>
+            </div>
+          </article>
+      </Link>
+    );
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50 overflow-x-hidden lg:overflow-y-hidden">
       {/* Overlay móvil para el drawer lateral */}
@@ -158,10 +235,11 @@ export default function DashboardPage() {
           {/* Banner Hero - Carrusel Swiper (banners dinámicos desde la API) */}
           <section className="relative rounded-3xl bg-gradient-to-br from-purple-600 to-indigo-700 text-white mb-6 lg:mb-8 overflow-hidden h-[200px] lg:h-[320px]">
             <Swiper
-              modules={[Pagination]}
+              modules={[Pagination, Autoplay]}
               slidesPerView={1}
               spaceBetween={4}
               pagination={{ clickable: true }}
+              autoplay={{ delay: 5000 }}
              className="hero-swiper h-full w-full"
             >
               {bannersLoading ? (
@@ -186,15 +264,14 @@ export default function DashboardPage() {
                 banners.map((banner) => (
                   <SwiperSlide key={banner.id} className="h-full w-full">
                     {banner.link ? (
-                      <Link href={banner.link} passHref legacyBehavior>
-                        <a
-                          className="block w-full"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                        >
-                          {renderBannerImage(banner)}
-                        </a>
+                      <Link
+                        href={banner.link}
+                        className="block w-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
+                        {renderBannerImage(banner)}
                       </Link>
                     ) : (
                       renderBannerImage(banner)
@@ -232,31 +309,37 @@ export default function DashboardPage() {
 `}</style>
           </section>
 
-          {/* Sección Seguir explorando */}
-          <section className="mb-6 lg:mb-8">
-            <div className="flex flex-col lg:flex-row items-center justify-between mb-3 lg:mb-4 gap-3">
-              <Placeholder className="placeholder-text-lg w-48 lg:w-auto" />
-              <div className="flex items-center gap-1 text-sm text-gray-500">
-                <IconChevronLeft className="w-3 h-3" />
-                <IconChevronRight className="w-3 h-3" />
-              </div>
-            </div>
-            <div className="flex gap-3 lg:gap-4 overflow-x-auto pb-2 scrollbar-hide">
-              {products.map((course) => (
-                <div key={course.title} className="flex-shrink-0 w-[200px] lg:w-64 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                  <div className="relative aspect-video bg-gray-200">
-                    <img src={course.image} alt={course.title} className="w-full h-full object-contain" />
-                    <button className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur rounded-full">{course.fav ? <IconHeart filled={true} /> : <IconHeart />}</button>
-                    <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md w-20">{course.label}</span>
-                  </div>
-                  <div className="p-3">
-                    <Placeholder className="placeholder-text-sm" label={course.title} />
-                    <Placeholder className="placeholder-text-sm" label={course.mentor} />
-                  </div>
-                </div>
-              ))}
-            </div>
+          {/* Sección Categorías principales (desde Payload CMS) */}
+          <section className="mb-8 lg:mb-10">
+          <div className="flex gap-4 lg:gap-5 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+            {categoriesLoading ? (
+              <>
+                <article
+                  className="flex-shrink-0 w-[220px] sm:w-[250px] lg:w-[280px] aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 snap-start"
+                >
+                  <div className="placeholder-box w-16 h-8 bg-white/20 rounded-lg" />
+                </article>
+                <article
+                  className="flex-shrink-0 w-[220px] sm:w-[250px] lg:w-[280px] aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 snap-start"
+                >
+                  <div className="placeholder-box w-16 h-8 bg-white/20 rounded-lg" />
+                </article>
+                <article
+                  className="flex-shrink-0 w-[220px] sm:w-[250px] lg:w-[280px] aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 snap-start"
+                >
+                  <div className="placeholder-box w-16 h-8 bg-white/20 rounded-lg" />
+                </article>
+              </>
+            ) : categories.length === 0 ? (
+              <article className="flex-shrink-0 w-[220px] sm:w-[250px] lg:w-[280px] rounded-2xl bg-gray-100 flex items-center justify-center snap-start">
+                <p className="text-sm opacity-90">No hay categorías destacadas</p>
+              </article>
+            ) : (
+              categories.map((category) => renderCategoryCard(category))
+            )}
+          </div>
           </section>
+
 
           {/* Sección Novedades editoriales */}
           <section className="mb-6 lg:mb-8">

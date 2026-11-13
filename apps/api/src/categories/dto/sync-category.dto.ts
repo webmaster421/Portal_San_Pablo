@@ -6,5 +6,9 @@ export interface SyncCategoryInput {
   payloadId: number;
   name: string;
   slug: string;
+  imageUrl?: string | null;
   description?: string | null;
+  active?: boolean;
+  order?: number;
+  featured?: boolean;
 }

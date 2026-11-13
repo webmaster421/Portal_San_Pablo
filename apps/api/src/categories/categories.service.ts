@@ -25,13 +25,21 @@ export class CategoryService {
         update: {
           name: data.name,
           slug: data.slug,
+          imageUrl: data.imageUrl ?? null,
           description: data.description ?? null,
+          active: data.active ?? true,
+          order: data.order ?? 0,
+          featured: data.featured ?? false,
         },
         create: {
           payloadId: data.payloadId,
           name: data.name,
           slug: data.slug,
+          imageUrl: data.imageUrl ?? null,
           description: data.description ?? null,
+          active: data.active ?? true,
+          order: data.order ?? 0,
+          featured: data.featured ?? false,
         },
       });
 
@@ -61,11 +69,16 @@ export class CategoryService {
   }
 
   /**
-   * Lista todas las categorías.
+   * Lista categorías activas y destacadas para el Home,
+   * ordenadas por el campo `order` ascendente.
    */
   async findAll() {
     return this.prisma.category.findMany({
-      orderBy: { createdAt: "desc" },
+      where: {
+        active: true,
+        featured: true,
+      },
+      orderBy: { order: "asc" },
     });
   }
 
@@ -94,5 +107,33 @@ export class CategoryService {
       select: { id: true },
     });
     return category ? category.id : null;
+  }
+
+  /**
+   * Desactiva lógicamente una categoría en NestJS cuando se elimina de Payload.
+   * Pone active=false para que no aparezca en Home ni en listados públicos.
+   * Devuelve true si se actualizó algún registro, false si no existía.
+   */
+  async deactivateCategory(payloadId: number): Promise<boolean> {
+    try {
+      const result = await this.prisma.category.updateMany({
+        where: { payloadId },
+        data: { active: false },
+      });
+
+      if (result.count > 0) {
+        this.logger.log(
+          `Categoría desactivada: payloadId=${payloadId}, filas=${result.count}`,
+        );
+      }
+
+      return result.count > 0;
+    } catch (error) {
+      this.logger.error(
+        `Error desactivando categoría payloadId=${payloadId}`,
+        error,
+      );
+      throw error;
+    }
   }
 }
