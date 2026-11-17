@@ -13,9 +13,10 @@ import { apiFetch } from "./api-client";
  * Llama a `GET /api/v1/banners` de la API central de NestJS.
  * Solo devuelve banners con `active = true`, ordenados por `order` ascendente.
  *
+ * @param init - Opciones de fetch opcionales (por ejemplo, caché).
  * @returns Arreglo de banners activos.
  * @throws Error si la petición falla o la API responde con error.
  */
-export async function getBanners(): Promise<Banner[]> {
-  return apiFetch<Banner[]>("/api/v1/banners");
+export async function getBanners(init?: RequestInit): Promise<Banner[]> {
+  return apiFetch<Banner[]>("/api/v1/banners", init);
 }

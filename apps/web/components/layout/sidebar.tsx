@@ -34,7 +34,7 @@ export default function Sidebar({
                 key={item.name}
                 onClick={() => {}}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  item.active ? "bg-purple-50 text-purple-700 shadow-sm" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  item.active ? "bg-purple-50 text-purple-700 shadow-sm" : "text-black hover:bg-[#BB080B] hover:text-white"
                 }`}
               >
                 {item.icon}

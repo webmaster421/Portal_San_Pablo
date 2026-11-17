@@ -7,13 +7,17 @@
  * Las peticiones se realizan únicamente a través de NEXT_PUBLIC_API_URL.
  * Nunca se expone ADMIN_API_KEY ni HMAC_SYNC_SECRET al frontend.
  */
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-if (!API_URL) {
-  throw new Error(
-    "NEXT_PUBLIC_API_URL no está definida. Defina la variable de entorno " +
-      "en apps/web/.env antes de usar el cliente de API.",
-  );
+function getApiUrl(): string {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_API_URL no está definida. Configure la variable de entorno " +
+        "NEXT_PUBLIC_API_URL (por ejemplo, en apps/web/.env o en el entorno de ejecución) " +
+        "con la URL base de la API NestJS antes de realizar peticiones.",
+    );
+  }
+  return apiUrl;
 }
 
 /**
@@ -28,7 +32,8 @@ export async function apiFetch<T = unknown>(
   path: string,
   init?: RequestInit,
 ): Promise<T> {
-  const url = `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  const apiUrl = getApiUrl();
+  const url = `${apiUrl}${path.startsWith("/") ? path : `/${path}`}`;
 
   const response = await fetch(url, {
     headers: {
