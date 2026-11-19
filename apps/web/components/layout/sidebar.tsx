@@ -1,21 +1,22 @@
 "use client";
 
-import { Placeholder, SkeletonAvatar, IconMenu } from "@/components/ui";
+import Link from "next/link";
+import { IconMenu } from "@/components/ui";
 import { NavigationItem } from "@/types/navigation";
-import type { Friend } from "@/data/mock";
+import type { Subcategory } from "@/types/subcategory";
 
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   navItems: NavigationItem[];
-  friends: Friend[];
+  subcategories: Subcategory[];
 }
 
 export default function Sidebar({
   sidebarOpen,
   setSidebarOpen,
   navItems,
-  friends,
+  subcategories,
 }: SidebarProps) {
   return (
     <aside
@@ -44,20 +45,24 @@ export default function Sidebar({
           </nav>
         </div>
 
-        <div className="p-4">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Clientes</h2>
-          <div className="space-y-3">
-            {friends.map((friend) => (
-              <div key={friend.name} className="flex items-center gap-3">
-                <SkeletonAvatar />
-                <div className="flex-1 min-w-0">
-                  <Placeholder className="placeholder-text-sm" label={friend.name} />
-                  <Placeholder className="placeholder-text-sm" label={friend.subtitle} />
-                </div>
-              </div>
-            ))}
+        {subcategories.length > 0 && (
+          <div className="p-4">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Subcategorías</h2>
+            <nav className="space-y-1">
+              {subcategories.map((subcategory) => (
+                <Link
+                  key={subcategory.id}
+                  href={`/subcategorias/${subcategory.slug}`}
+                  onClick={() => setSidebarOpen(false)}
+                  className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                >
+                  <span className="truncate">{subcategory.name}</span>
+                  <span aria-hidden="true" className="text-gray-400">›</span>
+                </Link>
+              ))}
+            </nav>
           </div>
-        </div>
+        )}
 
         <div className="p-4 mt-auto border-t border-gray-100 pt-4 shrink-0">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Configuración</h2>

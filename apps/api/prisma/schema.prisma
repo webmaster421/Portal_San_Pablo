@@ -14,18 +14,19 @@ model BackendCheck {
 }
 
 model Category {
-  id          Int      @id @default(autoincrement())
-  payloadId   Int      @unique
-  name        String
-  slug        String   @unique
-  imageUrl    String?
-  description String?
-  active      Boolean  @default(true)
-  featured    Boolean  @default(false)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  products    Product[]
+  id            Int           @id @default(autoincrement())
+  payloadId     Int           @unique
+  name          String
+  slug          String        @unique
+  imageUrl      String?
+  description   String?
+  active        Boolean       @default(true)
+  featured      Boolean       @default(false)
+  order         Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  products      Product[]
+  subcategories Subcategory[]
 
   @@index([payloadId])
   @@index([slug])
@@ -35,33 +36,34 @@ model Category {
 }
 
 model Product {
-  id            Int       @id @default(autoincrement())
-  payloadId     Int       @unique
-  title         String
-  slug          String    @unique
-  isbn          String
-  author        String
-  price         Int
-  imageUrl      String?
-  categoryName  String?
-  categoryId    Int?
-  category      Category? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  weight        Decimal?  @db.Decimal(10, 3)
-  width         Int?
-  height        Int?
-  description   Json?
-  status        String    @default("draft")
-  appliesTax    Boolean   @default(false)
-  taxValue      Decimal?  @db.Decimal(5, 2)
-  appliesShipping Boolean @default(false)
-  pages         Int?
-  keywords      String[]  @default([])
-  tags          String[]  @default([])
-  isNew         Boolean   @default(false)
-  visible       Boolean   @default(true)
-  inventory     Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              Int           @id @default(autoincrement())
+  payloadId       Int           @unique
+  title           String
+  slug            String        @unique
+  isbn            String
+  author          String?
+  price           Int
+  imageUrl        String?
+  categoryName    String?
+  categoryId      Int?
+  category        Category?     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  subcategories   Subcategory[]
+  weight          Decimal?      @db.Decimal(10, 3)
+  width           Int?
+  height          Int?
+  description     Json?
+  status          String        @default("draft")
+  appliesTax      Boolean       @default(false)
+  taxValue        Decimal?      @db.Decimal(5, 2)
+  appliesShipping Boolean       @default(false)
+  pages           Int?
+  keywords        String[]      @default([])
+  tags            String[]      @default([])
+  isNew           Boolean       @default(false)
+  visible         Boolean       @default(true)
+  inventory       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@index([status])
   @@index([isNew])
@@ -69,18 +71,41 @@ model Product {
   @@index([categoryId])
 }
 
+model Subcategory {
+  id          Int       @id @default(autoincrement())
+  payloadId   Int       @unique
+  name        String
+  slug        String    @unique
+  description String?
+  published   Boolean   @default(true)
+  showOnHome  Boolean   @default(false)
+  order       Int       @default(0)
+  categoryId  Int
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([payloadId])
+  @@index([slug])
+  @@index([categoryId])
+  @@index([published])
+  @@index([showOnHome])
+  @@index([order])
+}
+
 model Banner {
-  id            Int      @id @default(autoincrement())
-  payloadId     Int      @unique
-  title         String
-  imageUrl      String?
+  id             Int      @id @default(autoincrement())
+  payloadId      Int      @unique
+  title          String
+  imageUrl       String?
   mobileImageUrl String?
-  alt           String?
-  link          String?
-  active        Boolean  @default(true)
-  order         Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  alt            String?
+  link           String?
+  active         Boolean  @default(true)
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([payloadId])
   @@index([active])

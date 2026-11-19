@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     categories: Category;
+    subcategories: Subcategory;
     media: Media;
     products: Product;
     banners: Banner;
@@ -81,6 +82,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    subcategories: SubcategoriesSelect<false> | SubcategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     banners: BannersSelect<false> | BannersSelect<true>;
@@ -199,6 +201,34 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subcategories".
+ */
+export interface Subcategory {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  /**
+   * Indica si la subcategoría está publicada y puede mostrarse.
+   */
+  published?: boolean | null;
+  /**
+   * Indica si la subcategoría debe destacarse en la página principal.
+   */
+  showOnHome?: boolean | null;
+  /**
+   * Orden de visualización. Menor valor aparece primero.
+   */
+  order?: number | null;
+  /**
+   * Categoría principal a la que pertenece esta subcategoría.
+   */
+  category: number | Category;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
@@ -213,12 +243,16 @@ export interface Product {
    * Introduce el ISBN del libro.
    */
   isbn: string;
-  author: string;
+  author?: string | null;
   /**
    * Introduce el precio de venta en pesos colombianos.
    */
   price: number;
   category: number | Category;
+  /**
+   * Selecciona una o varias categorías secundarias a las que pertenece el producto.
+   */
+  subcategories?: (number | Subcategory)[] | null;
   /**
    * Introduce el peso en kilogramos.
    */
@@ -346,6 +380,10 @@ export interface PayloadLockedDocument {
         value: number | Category;
       } | null)
     | ({
+        relationTo: 'subcategories';
+        value: number | Subcategory;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -439,6 +477,21 @@ export interface CategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subcategories_select".
+ */
+export interface SubcategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  published?: T;
+  showOnHome?: T;
+  order?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -468,6 +521,7 @@ export interface ProductsSelect<T extends boolean = true> {
   author?: T;
   price?: T;
   category?: T;
+  subcategories?: T;
   weight?: T;
   status?: T;
   appliesTax?: T;

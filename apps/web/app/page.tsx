@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { NavigationItem } from "@/types/navigation";
-import { friends } from "@/data/mock";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import {
@@ -18,8 +17,10 @@ import HomeCategoriesSection from "@/components/home/HomeCategoriesSection";
 import HomeHeroBannerSection from "@/components/home/HomeHeroBannerSection";
 import { getBanners } from "@/services/banner.service";
 import { getCategories } from "@/services/category.service";
+import { getSubcategories } from "@/services/subcategory.service";
 import type { Banner } from "@/types/banner";
 import type { Category } from "@/types/category";
+import type { Subcategory } from "@/types/subcategory";
 
 interface UserAvatarProps {
   src?: string;
@@ -42,6 +43,8 @@ export default function DashboardPage() {
   const [bannersLoading, setBannersLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [, setFeaturedSubcategories] = useState<Subcategory[]>([]);
 
   useEffect(() => {
     getBanners({ cache: "no-store" })
@@ -67,6 +70,25 @@ export default function DashboardPage() {
       });
   }, []);
 
+  useEffect(() => {
+    getSubcategories()
+      .then((data: Subcategory[]) => {
+        setSubcategories(data);
+      })
+      .catch(() => {
+        setSubcategories([]);
+      });
+
+    // Stage 8: datos preparados para subcategorías destacadas en Home (sin rediseño ni sección visual nueva).
+    getSubcategories({ showOnHome: true })
+      .then((data: Subcategory[]) => {
+        setFeaturedSubcategories(data);
+      })
+      .catch(() => {
+        setFeaturedSubcategories([]);
+      });
+  }, []);
+
   const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL ?? "";
 
   return (
@@ -81,7 +103,7 @@ export default function DashboardPage() {
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         navItems={navItems}
-        friends={friends}
+        subcategories={subcategories}
       />
 
       <main className="flex-1 flex flex-col min-w-0 lg:ml-0 lg:h-[100vh] lg:overflow-hidden">

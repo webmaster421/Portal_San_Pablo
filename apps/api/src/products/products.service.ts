@@ -10,6 +10,43 @@ import { Prisma } from "@prisma/client";
 import type { CreateProductDto } from "./dto/create-product.dto";
 import type { UpdateProductDto } from "./dto/update-product.dto";
 
+export type CategoryProductSort =
+  | "popular"
+  | "newest"
+  | "price-asc"
+  | "price-desc"
+  | "name-asc";
+
+export interface FindByCategoryQuery {
+  page?: number;
+  limit?: number;
+  sort?: CategoryProductSort;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  tags?: string[];
+  features?: string[];
+}
+
+export interface CategoryProductsMeta {
+  priceBounds: {
+    min: number;
+    max: number;
+    hasValidPrices: boolean;
+    allSame: boolean;
+  };
+  availableTags: string[];
+}
+
+export interface PaginatedCategoryProducts {
+  products: Prisma.ProductGetPayload<object>[];
+  total: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  meta: CategoryProductsMeta;
+}
+
 /**
  * Servicio de productos.
  * Reutiliza exclusivamente el PrismaService existente: no crea una segunda conexión a PostgreSQL.
@@ -62,15 +99,246 @@ export class ProductService {
    * Lista productos publicados y visibles de una categoría específica.
    * Devuelve productos ordenados por fecha de creación descendente.
    */
-  async findByCategory(categoryId: number) {
-    return this.prisma.product.findMany({
-      where: {
-        categoryId,
-        status: "published",
-        visible: true,
-      },
-      orderBy: { createdAt: "desc" },
+  /**
+   * Lista productos publicados y visibles de una categor��a espec��fica con paginaci��n,
+   * filtros y ordenamiento. Incluye metadatos globales de la categor��a para la UI de filtros.
+   */
+  async findByCategory(
+    categoryId: number,
+    query: FindByCategoryQuery = {},
+  ): Promise<PaginatedCategoryProducts> {
+    const page = Number.isFinite(query.page) && (query.page ?? 0) > 0 ? Math.floor(query.page!) : 1;
+    const rawLimit = Number.isFinite(query.limit) && (query.limit ?? 0) > 0 ? Math.floor(query.limit!) : 12;
+    const limit = Math.min(Math.max(rawLimit, 1), 100);
+
+    const baseWhere: Prisma.ProductWhereInput = {
+      categoryId,
+      status: "published",
+      visible: true,
+    };
+
+    const andConditions: Prisma.ProductWhereInput[] = [];
+
+    const search = query.search?.trim();
+    if (search) {
+      andConditions.push({
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { isbn: { contains: search, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    const hasMin = typeof query.minPrice === "number" && Number.isFinite(query.minPrice);
+    const hasMax = typeof query.maxPrice === "number" && Number.isFinite(query.maxPrice);
+    if (hasMin || hasMax) {
+      const priceFilter: Prisma.IntFilter = {};
+      if (hasMin) priceFilter.gte = query.minPrice as number;
+      if (hasMax) priceFilter.lte = query.maxPrice as number;
+      andConditions.push({ price: priceFilter });
+    }
+
+    const tags = (query.tags ?? []).map((t) => t.trim()).filter(Boolean);
+    if (tags.length > 0) {
+      andConditions.push({
+        OR: [{ tags: { hasSome: tags } }, { keywords: { hasSome: tags } }],
+      });
+    }
+
+    const features = (query.features ?? []).map((f) => f.trim()).filter(Boolean);
+    if (features.includes("new")) {
+      andConditions.push({ isNew: true });
+    }
+
+    const where: Prisma.ProductWhereInput =
+      andConditions.length > 0 ? { AND: [baseWhere, ...andConditions] } : baseWhere;
+
+    const orderBy = this.resolveCategorySort(query.sort);
+
+    const skip = (page - 1) * limit;
+
+    const [total, products, meta] = await Promise.all([
+      this.prisma.product.count({ where }),
+      this.prisma.product.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      this.getCategoryFiltersMeta(baseWhere),
+    ]);
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+    return {
+      products,
+      total,
+      totalPages,
+      page,
+      limit,
+      meta,
+    };
+  }
+
+  /**
+   * Lista productos publicados y visibles asociados a una subcategoría publicada,
+   * con paginación, filtros y ordenamiento compatibles con el catálogo por categoría.
+   */
+  async findBySubcategory(
+    subcategoryId: number,
+    query: FindByCategoryQuery = {},
+  ): Promise<PaginatedCategoryProducts> {
+    const subcategory = await this.prisma.subcategory.findFirst({
+      where: { id: subcategoryId, published: true },
+      select: { id: true },
     });
+
+    if (!subcategory) {
+      throw new NotFoundException(`Subcategoría con id ${subcategoryId} no encontrada`);
+    }
+
+    const page = Number.isFinite(query.page) && (query.page ?? 0) > 0 ? Math.floor(query.page!) : 1;
+    const rawLimit = Number.isFinite(query.limit) && (query.limit ?? 0) > 0 ? Math.floor(query.limit!) : 12;
+    const limit = Math.min(Math.max(rawLimit, 1), 100);
+
+    const baseWhere: Prisma.ProductWhereInput = {
+      status: "published",
+      visible: true,
+      subcategories: {
+        some: {
+          id: subcategoryId,
+          published: true,
+        },
+      },
+    };
+
+    const andConditions: Prisma.ProductWhereInput[] = [];
+
+    const search = query.search?.trim();
+    if (search) {
+      andConditions.push({
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { isbn: { contains: search, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    const hasMin = typeof query.minPrice === "number" && Number.isFinite(query.minPrice);
+    const hasMax = typeof query.maxPrice === "number" && Number.isFinite(query.maxPrice);
+    if (hasMin || hasMax) {
+      const priceFilter: Prisma.IntFilter = {};
+      if (hasMin) priceFilter.gte = query.minPrice as number;
+      if (hasMax) priceFilter.lte = query.maxPrice as number;
+      andConditions.push({ price: priceFilter });
+    }
+
+    const tags = (query.tags ?? []).map((t) => t.trim()).filter(Boolean);
+    if (tags.length > 0) {
+      andConditions.push({
+        OR: [{ tags: { hasSome: tags } }, { keywords: { hasSome: tags } }],
+      });
+    }
+
+    const features = (query.features ?? []).map((f) => f.trim()).filter(Boolean);
+    if (features.includes("new")) {
+      andConditions.push({ isNew: true });
+    }
+
+    const where: Prisma.ProductWhereInput =
+      andConditions.length > 0 ? { AND: [baseWhere, ...andConditions] } : baseWhere;
+
+    const orderBy = this.resolveCategorySort(query.sort);
+    const skip = (page - 1) * limit;
+
+    const [total, products, meta] = await Promise.all([
+      this.prisma.product.count({ where }),
+      this.prisma.product.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      this.getCategoryFiltersMeta(baseWhere),
+    ]);
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+    return {
+      products,
+      total,
+      totalPages,
+      page,
+      limit,
+      meta,
+    };
+  }
+
+  private resolveCategorySort(
+    sort?: CategoryProductSort,
+  ): Prisma.ProductOrderByWithRelationInput {
+    switch (sort) {
+      case "price-asc":
+        return { price: "asc" };
+      case "price-desc":
+        return { price: "desc" };
+      case "name-asc":
+        return { title: "asc" };
+      case "newest":
+      case "popular":
+      default:
+        return { createdAt: "desc" };
+    }
+  }
+
+  private async getCategoryFiltersMeta(
+    baseWhere: Prisma.ProductWhereInput,
+  ): Promise<CategoryProductsMeta> {
+    const [priceAgg, tagRows] = await Promise.all([
+      this.prisma.product.aggregate({
+        where: baseWhere,
+        _min: { price: true },
+        _max: { price: true },
+        _count: { _all: true },
+      }),
+      this.prisma.product.findMany({
+        where: baseWhere,
+        select: { tags: true, keywords: true },
+      }),
+    ]);
+
+    const count = priceAgg._count._all ?? 0;
+    const minPrice = priceAgg._min.price;
+    const maxPrice = priceAgg._max.price;
+    const hasValidPrices = count > 0 && minPrice !== null && maxPrice !== null;
+    const boundsMin = 0;
+    const boundsMax = hasValidPrices ? (maxPrice as number) : 0;
+
+    const seen = new Set<string>();
+    const availableTags: string[] = [];
+    for (const row of tagRows) {
+      const values = [...(row.tags ?? []), ...(row.keywords ?? [])];
+      for (const value of values) {
+        if (typeof value !== "string") continue;
+        const trimmed = value.trim();
+        if (!trimmed) continue;
+        const key = trimmed.toLocaleLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        availableTags.push(trimmed);
+      }
+    }
+    availableTags.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+
+    return {
+      priceBounds: {
+        min: boundsMin,
+        max: boundsMax,
+        hasValidPrices,
+        allSame: hasValidPrices ? boundsMax === 0 : false,
+      },
+      availableTags,
+    };
   }
 
   /**
@@ -142,7 +410,7 @@ export class ProductService {
       title: data.title,
       slug: data.slug,
       isbn: data.isbn,
-      author: data.author,
+      author: data.author ?? null,
       price: data.price,
       payloadId: data.payloadId,
       status: data.status ?? "draft",

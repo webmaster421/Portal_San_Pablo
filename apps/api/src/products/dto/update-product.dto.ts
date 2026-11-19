@@ -8,7 +8,7 @@ export interface UpdateProductDto {
   title?: string;
   slug?: string;
   isbn?: string;
-  author?: string;
+  author?: string | null;
   price?: number;
   imageUrl?: string | null;
   categoryName?: string | null;

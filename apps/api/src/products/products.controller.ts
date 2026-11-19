@@ -6,12 +6,14 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   NotFoundException,
   ConflictException,
   BadRequestException,
   UseGuards,
 } from "@nestjs/common";
 import { ProductService } from "./products.service";
+import type { CategoryProductSort } from "./products.service";
 import type { CreateProductDto } from "./dto/create-product.dto";
 import type { UpdateProductDto } from "./dto/update-product.dto";
 import { AdminApiKeyGuard } from "../common/guards/admin-api-key.guard";
@@ -47,13 +49,113 @@ export class ProductController {
 
   /// Consulta productos por categoría (GET /api/v1/products/category/:categoryId)
   /// Se define antes que :id para evitar conflictos de rutas.
+  /// Soporta paginación y filtros mediante query params.
   @Get("category/:categoryId")
-  async findByCategory(@Param("categoryId") categoryId: string) {
+  async findByCategory(
+    @Param("categoryId") categoryId: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+    @Query("sort") sort?: string,
+    @Query("q") q?: string,
+    @Query("search") search?: string,
+    @Query("minPrice") minPrice?: string,
+    @Query("maxPrice") maxPrice?: string,
+    @Query("tags") tags?: string | string[],
+    @Query("features") features?: string | string[],
+  ) {
     const idNum = Number(categoryId);
     if (!Number.isFinite(idNum)) {
       throw new BadRequestException("El categoryId debe ser un número válido");
     }
-    return this.productService.findByCategory(idNum);
+
+    const parseIntParam = (value?: string): number | undefined => {
+      if (value == null || value === "") return undefined;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : undefined;
+    };
+
+    const parseStringList = (value?: string | string[]): string[] => {
+      if (value == null) return [];
+      const arr = Array.isArray(value) ? value : value.split(",");
+      return arr.map((v) => v.trim()).filter(Boolean);
+    };
+
+    const allowedSorts = new Set<CategoryProductSort>([
+      "popular",
+      "newest",
+      "price-asc",
+      "price-desc",
+      "name-asc",
+    ]);
+    const normalizedSort = allowedSorts.has(sort as CategoryProductSort)
+      ? (sort as CategoryProductSort)
+      : undefined;
+
+    return this.productService.findByCategory(idNum, {
+      page: parseIntParam(page),
+      limit: parseIntParam(limit),
+      sort: normalizedSort,
+      search: (q ?? search ?? "").trim() || undefined,
+      minPrice: parseIntParam(minPrice),
+      maxPrice: parseIntParam(maxPrice),
+      tags: parseStringList(tags),
+      features: parseStringList(features),
+    });
+  }
+
+  /// Consulta productos por subcategoría (GET /api/v1/products/subcategory/:subcategoryId)
+  /// Soporta paginación y filtros mediante query params.
+  @Get("subcategory/:subcategoryId")
+  async findBySubcategory(
+    @Param("subcategoryId") subcategoryId: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+    @Query("sort") sort?: string,
+    @Query("q") q?: string,
+    @Query("search") search?: string,
+    @Query("minPrice") minPrice?: string,
+    @Query("maxPrice") maxPrice?: string,
+    @Query("tags") tags?: string | string[],
+    @Query("features") features?: string | string[],
+  ) {
+    const idNum = Number(subcategoryId);
+    if (!Number.isFinite(idNum)) {
+      throw new BadRequestException("El subcategoryId debe ser un número válido");
+    }
+
+    const parseIntParam = (value?: string): number | undefined => {
+      if (value == null || value === "") return undefined;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : undefined;
+    };
+
+    const parseStringList = (value?: string | string[]): string[] => {
+      if (value == null) return [];
+      const arr = Array.isArray(value) ? value : value.split(",");
+      return arr.map((v) => v.trim()).filter(Boolean);
+    };
+
+    const allowedSorts = new Set<CategoryProductSort>([
+      "popular",
+      "newest",
+      "price-asc",
+      "price-desc",
+      "name-asc",
+    ]);
+    const normalizedSort = allowedSorts.has(sort as CategoryProductSort)
+      ? (sort as CategoryProductSort)
+      : undefined;
+
+    return this.productService.findBySubcategory(idNum, {
+      page: parseIntParam(page),
+      limit: parseIntParam(limit),
+      sort: normalizedSort,
+      search: (q ?? search ?? "").trim() || undefined,
+      minPrice: parseIntParam(minPrice),
+      maxPrice: parseIntParam(maxPrice),
+      tags: parseStringList(tags),
+      features: parseStringList(features),
+    });
   }
 
   /// Consulta por ID (GET /api/v1/products/:id)
@@ -72,9 +174,9 @@ export class ProductController {
   @UseGuards(AdminApiKeyGuard)
   async create(@Body() data: CreateProductDto) {
     // Validación básica de campos obligatorios
-    if (!data.title || !data.slug || !data.isbn || !data.author) {
+    if (!data.title || !data.slug || !data.isbn) {
       throw new BadRequestException(
-        "title, slug, isbn y author son campos obligatorios",
+        "title, slug e isbn son campos obligatorios",
       );
     }
     if (!Number.isFinite(data.price)) {

@@ -137,16 +137,42 @@ export function mapPayloadProductToSync(data: any): Record<string, unknown> {
         ? Number(categoryPayloadId)
         : null;
 
+  const rawAuthor = data.author;
+  const author = rawAuthor == null || rawAuthor === "" ? null : rawAuthor;
+
+  const rawSubcategories = Array.isArray(data.subcategories) ? data.subcategories : [];
+  const subcategoryPayloadIds = Array.from(
+    new Set(
+      rawSubcategories
+        .map((item: unknown) => {
+          if (typeof item === "number") return item;
+          if (typeof item === "string" && item.trim() !== "" && !Number.isNaN(Number(item))) {
+            return Number(item);
+          }
+          if (typeof item === "object" && item !== null && "id" in item) {
+            const id = (item as { id?: number | string | null }).id;
+            if (typeof id === "number") return id;
+            if (typeof id === "string" && id.trim() !== "" && !Number.isNaN(Number(id))) {
+              return Number(id);
+            }
+          }
+          return null;
+        })
+        .filter((id): id is number => typeof id === "number" && Number.isFinite(id)),
+    ),
+  );
+
   return {
     payloadId: data.id,
     title: data.title,
     slug: data.slug,
     isbn: data.isbn,
-    author: data.author,
+    author,
     price: data.price,
     imageUrl,
     categoryName,
     categoryPayloadId: normalizedCategoryPayloadId,
+    subcategoryPayloadIds,
     weight: data.weight ?? null,
     width: dimensions?.width ?? null,
     height: dimensions?.height ?? null,
@@ -217,6 +243,29 @@ export async function syncCategoryToNestJS(
   const url = `${getApiUrl()}/api/v1/sync/categories`;
   await requestWithRetry(url, "POST", body);
 }
+
+/**
+ * Envía una subcategoría creada o actualizada a NestJS (upsert idempotente por payloadId).
+ */
+export async function syncSubcategoryToNestJS(
+  payload: Record<string, unknown>,
+): Promise<void> {
+  const body = JSON.stringify(payload);
+  const url = `${getApiUrl()}/api/v1/sync/subcategories`;
+  await requestWithRetry(url, "POST", body);
+}
+
+/**
+ * Desactiva lógicamente una subcategoría en NestJS cuando se elimina de Payload.
+ */
+export async function deactivateSubcategoryInNestJS(
+  payloadId: number,
+): Promise<void> {
+  const body = JSON.stringify({});
+  const url = `${getApiUrl()}/api/v1/sync/subcategories/${payloadId}/deactivate`;
+  await requestWithRetry(url, "PATCH", body);
+}
+
 
 /**
  * Envía un banner creado o actualizado a NestJS (upsert idempotente por payloadId).

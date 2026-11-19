@@ -109,7 +109,7 @@ export const Products: CollectionConfig = {
         {
           name: "author",
           type: "text",
-          required: true,
+          required: false,
           label: "Autor",
         },
       ],
@@ -144,11 +144,22 @@ export const Products: CollectionConfig = {
           relationTo: "categories",
           hasMany: false,
           required: true,
-          label: "Categoría",
+          label: "Categoría principal",
         },
       ],
       admin: {
         className: "sp-product-fields-row",
+      },
+    },
+    {
+      name: "subcategories",
+      type: "relationship",
+      relationTo: "subcategories",
+      hasMany: true,
+      required: false,
+      label: "Categorías secundarias",
+      admin: {
+        description: "Selecciona una o varias categorías secundarias a las que pertenece el producto.",
       },
     },
     {

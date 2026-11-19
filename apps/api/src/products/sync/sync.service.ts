@@ -4,18 +4,20 @@ import { Prisma } from "@prisma/client";
 
 /**
  * Entrada de sincronización enviada desde Payload CMS.
- * Todos los campos son opcionales excepto payloadId, title, slug, isbn, author, price.
+ * Todos los campos son opcionales excepto payloadId, title, slug, isbn, price.
+ * author es opcional y puede ser null.
  */
 export interface SyncProductInput {
   payloadId: number;
   title: string;
   slug: string;
   isbn: string;
-  author: string;
+  author?: string | null;
   price: number;
   imageUrl?: string | null;
   categoryName?: string | null;
   categoryPayloadId?: number | null;
+  subcategoryPayloadIds?: number[] | null;
   weight?: number | null;
   width?: number | null;
   height?: number | null;
@@ -66,13 +68,46 @@ export class SyncService {
         }
       }
 
+      // Resolver subcategorías por payloadId. Si alguna no existe, se omite y se registra advertencia.
+      let subcategoryIds: number[] = [];
+      if (Array.isArray(data.subcategoryPayloadIds)) {
+        const uniquePayloadIds = Array.from(
+          new Set(
+            data.subcategoryPayloadIds.filter(
+              (id): id is number => typeof id === "number" && Number.isFinite(id),
+            ),
+          ),
+        );
+
+        if (uniquePayloadIds.length > 0) {
+          const subcategories = await this.prisma.subcategory.findMany({
+            where: { payloadId: { in: uniquePayloadIds } },
+            select: { id: true, payloadId: true },
+          });
+
+          const foundByPayloadId = new Map(subcategories.map((s) => [s.payloadId, s.id]));
+          subcategoryIds = uniquePayloadIds
+            .map((payloadId) => foundByPayloadId.get(payloadId))
+            .filter((id): id is number => typeof id === "number");
+
+          const missing = uniquePayloadIds.filter((payloadId) => !foundByPayloadId.has(payloadId));
+          if (missing.length > 0) {
+            this.logger.warn(
+              `Subcategorías no encontradas en PostgreSQL para producto payloadId=${data.payloadId}: [${missing.join(', ')}]. Se sincronizarán las asignaciones disponibles.`,
+            );
+          }
+        }
+      }
+
+      const subcategoryConnect = subcategoryIds.map((id) => ({ id }));
+
       const result = await this.prisma.product.upsert({
         where: { payloadId: data.payloadId },
         update: {
           title: data.title,
           slug: data.slug,
           isbn: data.isbn,
-          author: data.author,
+          author: data.author ?? null,
           price: data.price,
           imageUrl: data.imageUrl ?? null,
           categoryName: data.categoryName ?? null,
@@ -94,13 +129,14 @@ export class SyncService {
           isNew: data.isNew ?? false,
           visible: data.visible ?? true,
           inventory: data.inventory ?? 0,
+          subcategories: { set: subcategoryConnect },
         },
         create: {
           payloadId: data.payloadId,
           title: data.title,
           slug: data.slug,
           isbn: data.isbn,
-          author: data.author,
+          author: data.author ?? null,
           price: data.price,
           imageUrl: data.imageUrl ?? null,
           categoryName: data.categoryName ?? null,
@@ -122,6 +158,7 @@ export class SyncService {
           isNew: data.isNew ?? false,
           visible: data.visible ?? true,
           inventory: data.inventory ?? 0,
+          subcategories: { connect: subcategoryConnect },
         },
       });
 

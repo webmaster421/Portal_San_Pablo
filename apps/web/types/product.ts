@@ -8,7 +8,7 @@ export interface Product {
   title: string;
   slug: string;
   isbn: string;
-  author: string;
+  author: string | null;
   price: number;
   imageUrl: string | null;
   categoryName: string | null;
@@ -29,4 +29,36 @@ export interface Product {
   inventory: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CategoryProductsPriceBounds {
+  min: number;
+  max: number;
+  hasValidPrices: boolean;
+  allSame: boolean;
+}
+
+export interface CategoryProductsMeta {
+  priceBounds: CategoryProductsPriceBounds;
+  availableTags: string[];
+}
+
+export interface PaginatedCategoryProductsResponse {
+  products: Product[];
+  total: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  meta: CategoryProductsMeta;
+}
+
+export interface GetProductsByCategoryParams {
+  page?: number;
+  limit?: number;
+  sort?: "popular" | "newest" | "price-asc" | "price-desc" | "name-asc";
+  q?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  tags?: string[];
+  features?: string[];
 }

@@ -37,9 +37,9 @@ export class SyncController {
     if (!data.payloadId) {
       throw new BadRequestException("payloadId es obligatorio");
     }
-    if (!data.title || !data.slug || !data.isbn || !data.author) {
+    if (!data.title || !data.slug || !data.isbn) {
       throw new BadRequestException(
-        "title, slug, isbn y author son campos obligatorios",
+        "title, slug e isbn son campos obligatorios",
       );
     }
     if (!Number.isFinite(data.price)) {

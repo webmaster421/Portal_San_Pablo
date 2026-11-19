@@ -31,6 +31,7 @@ interface FilterSidebarContentProps {
   onToggleFeature: (featureId: string) => void;
   onClearAll: () => void;
   showClearButton?: boolean;
+  onPriceCommit?: () => void;
 }
 
 export default function FilterSidebarContent({
@@ -46,6 +47,7 @@ export default function FilterSidebarContent({
   onToggleFeature,
   onClearAll,
   showClearButton = true,
+  onPriceCommit,
 }: FilterSidebarContentProps) {
   const uid = useId();
   const sortId = `${uid}-catalog-sort`;
@@ -81,15 +83,6 @@ export default function FilterSidebarContent({
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-gray-900">Filtrar productos</h2>
-        {showClearButton && (
-          <button
-            type="button"
-            onClick={onClearAll}
-            className="text-sm font-medium text-gray-600 hover:text-gray-900 underline-offset-2 hover:underline"
-          >
-            Limpiar todo
-          </button>
-        )}
       </div>
 
       <section className="border-t border-gray-200 pt-4">
@@ -131,12 +124,19 @@ export default function FilterSidebarContent({
                   step={bounds.allSame ? 1 : "any"}
                   value={currentMin}
                   onChange={handleMinRange}
+                  onMouseUp={onPriceCommit}
+                  onTouchEnd={onPriceCommit}
+                  onKeyUp={(e) => {
+                    if (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Home" || e.key === "End") {
+                      onPriceCommit?.();
+                    }
+                  }}
                   disabled={sliderDisabled}
-                  aria-label="Precio mínimo"
+                  aria-label="Precio m?nimo"
                   className="absolute inset-0 h-6 w-full cursor-pointer appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-gray-400 [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
                   style={{ zIndex: currentMin >= bounds.max ? 5 : 3 }}
                 />
-                <label className="sr-only" htmlFor={maxRangeId}>Precio máximo</label>
+                <label className="sr-only" htmlFor={maxRangeId}>Precio m?ximo</label>
                 <input
                   id={maxRangeId}
                   type="range"
@@ -145,8 +145,15 @@ export default function FilterSidebarContent({
                   step={bounds.allSame ? 1 : "any"}
                   value={currentMax}
                   onChange={handleMaxRange}
+                  onMouseUp={onPriceCommit}
+                  onTouchEnd={onPriceCommit}
+                  onKeyUp={(e) => {
+                    if (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Home" || e.key === "End") {
+                      onPriceCommit?.();
+                    }
+                  }}
                   disabled={sliderDisabled}
-                  aria-label="Precio máximo"
+                  aria-label="Precio m?ximo"
                   className="absolute inset-0 h-6 w-full cursor-pointer appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-gray-400 [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
                   style={{ zIndex: 4 }}
                 />
@@ -216,7 +223,17 @@ export default function FilterSidebarContent({
         )}
       </section>
 
-      
+      {showClearButton && (
+        <div className="border-t border-gray-200 pt-4">
+          <button
+            type="button"
+            onClick={onClearAll}
+            className="w-full inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
+          >
+            Limpiar todo
+          </button>
+        </div>
+      )}
     </div>
   );
 }

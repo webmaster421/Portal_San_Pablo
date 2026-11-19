@@ -10,6 +10,7 @@ import { Banners } from "./collections/Banners";
 import { Categories } from "./collections/Categories";
 import { Media } from "./collections/Media";
 import { Products } from "./collections/Products";
+import { Subcategories } from "./collections/Subcategories";
 import { Users } from "./collections/Users";
 
 const filename = fileURLToPath(import.meta.url);
@@ -42,7 +43,7 @@ export default buildConfig({
     fallbackLanguage: "es",
     supportedLanguages: { es: translations.es },
   },
-  collections: [Users, Categories, Media, Products, Banners],
+  collections: [Users, Categories, Subcategories, Media, Products, Banners],
   editor: lexicalEditor(),
   secret: payloadSecret,
   typescript: {

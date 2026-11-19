@@ -33,6 +33,7 @@ export interface FilterState {
   priceMax: number | null;
   selectedTags: string[];
   selectedFeatures: string[];
+  searchQuery: string;
 }
 
 const COP_FORMATTER = new Intl.NumberFormat("es-CO", {
@@ -177,11 +178,17 @@ export function applyFiltersAndSort(
   bounds: PriceBounds,
 ): Product[] {
   const withIndex = products.map((product, index) => ({ product, index }));
+  const query = state.searchQuery.trim().toLocaleLowerCase();
 
   const filtered = withIndex.filter(({ product }) => {
     if (!matchesPriceRange(product, state, bounds)) return false;
     if (!productHasSelectedTag(product, state.selectedTags)) return false;
     if (!productMatchesSelectedFeatures(product, state.selectedFeatures)) return false;
+    if (query) {
+      const title = (product.title ?? "").toLocaleLowerCase();
+      const isbn = (product.isbn ?? "").toLocaleLowerCase();
+      if (!title.includes(query) && !isbn.includes(query)) return false;
+    }
     return true;
   });
 
@@ -237,5 +244,6 @@ export function createInitialFilterState(bounds: PriceBounds): FilterState {
     priceMax: bounds.hasValidPrices ? bounds.max : null,
     selectedTags: [],
     selectedFeatures: [],
+    searchQuery: "",
   };
 }
