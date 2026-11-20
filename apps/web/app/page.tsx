@@ -15,11 +15,14 @@ import MobileBottomNav from "@/components/home/MobileBottomNav";
 import MobileSidebarOverlay from "@/components/home/MobileSidebarOverlay";
 import HomeCategoriesSection from "@/components/home/HomeCategoriesSection";
 import HomeHeroBannerSection from "@/components/home/HomeHeroBannerSection";
+import RecommendedProductsCarousel from "@/components/catalog/RecommendedProductsCarousel";
 import { getBanners } from "@/services/banner.service";
 import { getCategories } from "@/services/category.service";
+import { getProducts } from "@/services/product.service";
 import { getSubcategories } from "@/services/subcategory.service";
 import type { Banner } from "@/types/banner";
 import type { Category } from "@/types/category";
+import type { Product } from "@/types/product";
 import type { Subcategory } from "@/types/subcategory";
 
 interface UserAvatarProps {
@@ -45,6 +48,7 @@ export default function DashboardPage() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [, setFeaturedSubcategories] = useState<Subcategory[]>([]);
+  const [novedades, setNovedades] = useState<Product[]>([]);
 
   useEffect(() => {
     getBanners({ cache: "no-store" })
@@ -89,6 +93,16 @@ export default function DashboardPage() {
       });
   }, []);
 
+  useEffect(() => {
+    getProducts()
+      .then((data: Product[]) => {
+        setNovedades(data.filter((product) => product.isNew === true));
+      })
+      .catch(() => {
+        setNovedades([]);
+      });
+  }, []);
+
   const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL ?? "";
 
   return (
@@ -123,7 +137,14 @@ export default function DashboardPage() {
             categories={categories}
             categoriesLoading={categoriesLoading}
             cmsUrl={cmsUrl}
-          />          
+          />
+
+          <RecommendedProductsCarousel
+            products={novedades}
+            cmsBaseUrl={cmsUrl}
+            title="Novedades"
+            headerLayout="title-start-line"
+          />
         </div>
       </main>
       <HomeRightSidebar />

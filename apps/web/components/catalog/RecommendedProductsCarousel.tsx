@@ -9,6 +9,7 @@ interface RecommendedProductsCarouselProps {
   categoryName?: string | null;
   cmsBaseUrl: string;
   title?: string;
+  headerLayout?: "default" | "title-start-line";
 }
 
 function resolveImageUrl(
@@ -49,6 +50,7 @@ export default function RecommendedProductsCarousel({
   categoryName,
   cmsBaseUrl,
   title = "También te puede interesar",
+  headerLayout = "default",
 }: RecommendedProductsCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const recommended = getRecommendedProducts(products, 8);
@@ -62,33 +64,48 @@ export default function RecommendedProductsCarousel({
     el.scrollBy({ left: direction === "left" ? -amount : amount, behavior: "smooth" });
   };
 
+  const navButtons = (
+    <div className="hidden sm:flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => scrollByAmount("left")}
+        aria-label="Ver productos anteriores"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        onClick={() => scrollByAmount("right")}
+        aria-label="Ver más productos"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M7.5 4.5L13 10l-5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+    </div>
+  );
+
   return (
-    <section className="mt-10 pt-8 border-t border-gray-200" aria-label={title}>
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">{title}</h2>
-        <div className="hidden sm:flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => scrollByAmount("left")}
-            aria-label="Ver productos anteriores"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollByAmount("right")}
-            aria-label="Ver más productos"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M7.5 4.5L13 10l-5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+    <section
+      className={headerLayout === "title-start-line" ? "mt-4 pt-2" : "mt-4 pt-4 border-t border-gray-200"}
+      aria-label={title}
+    >
+      {headerLayout === "title-start-line" ? (
+        <div className="mb-4 flex items-center gap-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 whitespace-nowrap">{title}</h2>
+          <div className="h-px flex-1 bg-gray-200" />
+          {navButtons}
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">{title}</h2>
+          {navButtons}
+        </div>
+      )}
 
       <div
         ref={scrollerRef}

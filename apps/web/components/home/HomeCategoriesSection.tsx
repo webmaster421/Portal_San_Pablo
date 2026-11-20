@@ -13,7 +13,7 @@ export default function HomeCategoriesSection({
   cmsUrl,
 }: HomeCategoriesSectionProps) {
   return (
-    <section className="mb-8 lg:mb-10">
+    <section className="mb-8 lg:mb-0">
       <div className="flex gap-4 lg:gap-5 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
         {categoriesLoading ? (
           <>

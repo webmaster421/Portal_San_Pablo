@@ -2,9 +2,11 @@ import type { Category } from "@/types/category";
 import type {
   GetProductsByCategoryParams,
   PaginatedCategoryProductsResponse,
+  Product,
 } from "@/types/product";
 import { getCategoryBySlug } from "@/services/category.service";
-import { getProductsByCategory } from "@/services/product.service";
+import { getProductsByCategory, getProductsBySubcategory } from "@/services/product.service";
+import { getSubcategories } from "@/services/subcategory.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CatalogWithFilters from "@/components/catalog/CatalogWithFilters";
@@ -100,6 +102,54 @@ export default async function CategoryPage({
     };
   }
 
+  // "También te puede interesar": en la categoría principal, mostrar productos
+  // de las subcategorías enlazadas a esta categoría (incluyendo todas las subcategorías).
+  let recommendedProducts: Product[] = [];
+  try {
+    const linkedSubcategories = await getSubcategories(
+      { categoryId: category.id },
+      { cache: "no-store" },
+    );
+    if (linkedSubcategories.length > 0) {
+      const results = await Promise.allSettled(
+        linkedSubcategories.map((sub) =>
+          getProductsBySubcategory(
+            sub.id,
+            { page: 1, limit: 8 },
+            { cache: "no-store" },
+          ),
+        ),
+      );
+
+      const productLists = results
+        .filter(
+          (result): result is PromiseFulfilledResult<PaginatedCategoryProductsResponse> =>
+            result.status === "fulfilled",
+        )
+        .map((result) => result.value.products ?? []);
+
+      // Mezcla round-robin para incluir productos de todas las subcategorías enlazadas.
+      const seen = new Set<number>();
+      let addedInRound = true;
+      let index = 0;
+      while (recommendedProducts.length < 12 && addedInRound) {
+        addedInRound = false;
+        for (const list of productLists) {
+          const product = list[index];
+          if (!product) continue;
+          addedInRound = true;
+          if (seen.has(product.id)) continue;
+          seen.add(product.id);
+          recommendedProducts.push(product);
+          if (recommendedProducts.length >= 12) break;
+        }
+        index += 1;
+      }
+    }
+  } catch {
+    recommendedProducts = [];
+  }
+
   const cmsBaseUrl =
     process.env.NEXT_PUBLIC_CMS_URL ?? process.env.CMS_URL ?? "";
 
@@ -140,6 +190,7 @@ export default async function CategoryPage({
             limit={catalogData.limit}
             priceBounds={catalogData.meta.priceBounds}
             availableTags={catalogData.meta.availableTags}
+            recommendedProducts={recommendedProducts}
           />
         )}
       </main>

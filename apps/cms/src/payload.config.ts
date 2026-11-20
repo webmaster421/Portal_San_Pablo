@@ -53,6 +53,11 @@ export default buildConfig({
     client: {
       url: process.env.DATABASE_URL || "file:./payload.db",
     },
+    // Disable automatic Drizzle schema push on startup.
+    // The existing SQLite schema is already present (including subcategories and
+    // payload_locked_documents_rels indexes), so pushing can conflict with
+    // existing indexes during concurrent dev initialization.
+    push: false,
   }),
   plugins: [],
 });

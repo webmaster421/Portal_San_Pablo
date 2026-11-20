@@ -26,6 +26,7 @@ interface CatalogWithFiltersProps {
   limit: number;
   priceBounds: CategoryProductsPriceBounds;
   availableTags: string[];
+  recommendedProducts?: Product[];
 }
 
 function resolveImageUrl(
@@ -189,6 +190,7 @@ export default function CatalogWithFilters({
   limit,
   priceBounds,
   availableTags,
+  recommendedProducts = [],
 }: CatalogWithFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -469,11 +471,13 @@ export default function CatalogWithFilters({
                 onPageChange={handlePageChange}
                 disabled={isPending}
               />
-              <RecommendedProductsCarousel
-                products={products}
-                categoryName={categoryName}
-                cmsBaseUrl={cmsBaseUrl}
-              />
+              {recommendedProducts.length > 0 ? (
+                <RecommendedProductsCarousel
+                  products={recommendedProducts}
+                  categoryName={categoryName}
+                  cmsBaseUrl={cmsBaseUrl}
+                />
+              ) : null}
             </>
           )}
         </section>

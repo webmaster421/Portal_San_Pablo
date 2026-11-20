@@ -115,6 +115,11 @@ export class ProductService {
       categoryId,
       status: "published",
       visible: true,
+      // Solo productos asignados directamente a la categoría principal.
+      // Los productos asignados a subcategorías no deben mostrarse en la categoría padre.
+      subcategories: {
+        none: {},
+      },
     };
 
     const andConditions: Prisma.ProductWhereInput[] = [];

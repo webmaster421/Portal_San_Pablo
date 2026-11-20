@@ -143,8 +143,11 @@ export const Products: CollectionConfig = {
           type: "relationship",
           relationTo: "categories",
           hasMany: false,
-          required: true,
+          required: false,
           label: "Categoría principal",
+          admin: {
+            description: "Opcional si el producto tiene al menos una categoría secundaria.",
+          },
         },
       ],
       admin: {
@@ -157,9 +160,93 @@ export const Products: CollectionConfig = {
       relationTo: "subcategories",
       hasMany: true,
       required: false,
-      label: "Categorías secundarias",
+      label: "Categoría secundaria",
+      validate: async (
+        value: unknown,
+        { data, req }: { data?: { category?: unknown }; req?: { payload?: { findByID: Function } } },
+      ) => {
+        const hasSelectedValue = (v: unknown): boolean => {
+          if (v === null || v === undefined || v === "") return false;
+          if (Array.isArray(v)) {
+            return v.some((item) => hasSelectedValue(item));
+          }
+          if (typeof v === "object") {
+            const obj = v as { id?: unknown; value?: unknown; relationTo?: unknown };
+            const candidate = obj.value ?? obj.id;
+            if (candidate !== undefined) {
+              return hasSelectedValue(candidate);
+            }
+            return false;
+          }
+          return true;
+        };
+
+        const extractId = (v: unknown): string | number | null => {
+          if (v === null || v === undefined || v === "") return null;
+          if (typeof v === "object") {
+            const obj = v as { id?: unknown; value?: unknown };
+            const candidate = obj.value ?? obj.id;
+            return extractId(candidate);
+          }
+          if (typeof v === "string" || typeof v === "number") return v;
+          return null;
+        };
+
+        const categoryValue = data?.category;
+        const hasCategory = hasSelectedValue(categoryValue);
+
+        const subcategoryItems = Array.isArray(value)
+          ? value.filter((item) => hasSelectedValue(item))
+          : hasSelectedValue(value)
+            ? [value]
+            : [];
+        const hasSubcategories = subcategoryItems.length > 0;
+
+        if (!hasCategory && !hasSubcategories) {
+          return "Debes seleccionar una categoría principal o una categoría secundaria para guardar el producto.";
+        }
+
+        if (subcategoryItems.length > 1) {
+          return "Selecciona solo una categoría secundaria para este producto.";
+        }
+
+        if (hasCategory && hasSubcategories) {
+          // Permitir solo si la categoría seleccionada coincide con la categoría
+          // principal de la subcategoría (asignación por subcategoría). Esto evita
+          // falsos positivos cuando el formulario/autorrelleno mantiene la categoría
+          // padre y permite crear productos pertenecientes solo a una subcategoría.
+          const subcategoryId = extractId(subcategoryItems[0]);
+          const selectedCategoryId = extractId(categoryValue);
+
+          if (subcategoryId !== null && selectedCategoryId !== null && req?.payload?.findByID) {
+            try {
+              const subcategory = await req.payload.findByID({
+                collection: "subcategories",
+                id: subcategoryId,
+                depth: 0,
+              });
+              const subcategoryCategoryId = extractId(
+                (subcategory as { category?: unknown } | null)?.category,
+              );
+              if (
+                subcategoryCategoryId !== null &&
+                String(subcategoryCategoryId) === String(selectedCategoryId)
+              ) {
+                return true;
+              }
+            } catch {
+              // Si no se puede resolver, aplicar la validación estricta abajo.
+            }
+          }
+
+          return "Selecciona solo una categoría principal o una categoría secundaria, no ambas.";
+        }
+
+        return true;
+      },
       admin: {
-        description: "Selecciona una o varias categorías secundarias a las que pertenece el producto.",
+        description:
+          "Opcional. Si asignas una categoría secundaria, el producto aparecerá solo en esa subcategoría (no en la categoría principal ni en otras subcategorías). No combines con categoría principal.",
       },
     },
     {
@@ -173,11 +260,11 @@ export const Products: CollectionConfig = {
             if (value === null || value === undefined) {
               return true;
             }
-            return value > 0 || "El peso debe ser un número positivo, en kilogramos.";
+            return value > 0 || "El peso debe ser un número positivo, en gramos.";
           },
-          label: "Peso (kg)",
+          label: "Peso (g)",
           admin: {
-            description: "Introduce el peso en kilogramos.",
+            description: "Introduce el peso en gramos.",
           },
         },
         {
@@ -357,6 +444,22 @@ export const Products: CollectionConfig = {
     },
   ],
   hooks: {
+    afterRead: [
+      // Convierte el peso almacenado en kilogramos a gramos para mostrarlo en el admin.
+      ({ doc, req }) => {
+        if (!doc) return doc;
+        if (req?.context?.skipWeightGramConversion) return doc;
+
+        const value = doc.weight;
+        if (value === null || value === undefined || value === "") return doc;
+        const numeric = typeof value === "number" ? value : Number(value);
+        if (!Number.isFinite(numeric)) return doc;
+        return {
+          ...doc,
+          weight: numeric * 1000,
+        };
+      },
+    ],
     beforeChange: [
       // Sanitiza marcas de tiempo inválidas antes de guardar.
       // Evita RangeError: Invalid time value al llamar .toISOString() en el admin.
@@ -371,6 +474,28 @@ export const Products: CollectionConfig = {
         if (!isValidDate(data.updatedAt)) data.updatedAt = now;
         return data;
       },
+
+      // Convierte el peso ingresado en gramos (UI) a kilogramos para almacenamiento/sincronización.
+      ({ data, originalDoc }) => {
+        if (!data) return data;
+
+        if (data.weight === null || data.weight === undefined || data.weight === "") {
+          // Si se limpió explícitamente el campo, conservar null; si no vino en update, no tocar.
+          if (Object.prototype.hasOwnProperty.call(data, "weight")) {
+            data.weight = null;
+          }
+          return data;
+        }
+
+        const weightValue = typeof data.weight === "number" ? data.weight : Number(data.weight);
+        if (Number.isFinite(weightValue)) {
+          data.weight = weightValue / 1000;
+        } else if (originalDoc?.weight !== undefined) {
+          data.weight = originalDoc.weight;
+        }
+
+        return data;
+      },
       // Generación automática del slug a partir del título.
       // - En creación: si el slug viene vacío, se genera desde el título.
       // - En actualización: nunca se sobrescribe (conserva slugs existentes y ediciones manuales).
@@ -381,6 +506,77 @@ export const Products: CollectionConfig = {
             data.slug = slugify(data?.title ?? "");
           }
         }
+        return data;
+      },
+
+      // Si no se selecciona categoria principal pero si subcategorias, infiere
+      // la categoria principal desde la primera subcategoria seleccionada.
+      // Esto preserva la relacion subcategoria->categoria y evita el fallo 500
+      // por la restriccion NOT NULL de category_id en el esquema SQLite actual del CMS.
+      async ({ data, req, originalDoc }) => {
+        if (!data) {
+          return data;
+        }
+
+        const isEmptyValue = (value: unknown): boolean =>
+          value === null || value === undefined || value === "";
+
+        const categoryValue = data.category ?? originalDoc?.category;
+        const subcategoriesValue =
+          data.subcategories !== undefined
+            ? data.subcategories
+            : originalDoc?.subcategories;
+
+        if (!isEmptyValue(categoryValue)) {
+          return data;
+        }
+
+        const subcategoryItems = Array.isArray(subcategoriesValue)
+          ? subcategoriesValue
+          : subcategoriesValue
+            ? [subcategoriesValue]
+            : [];
+
+        if (subcategoryItems.length === 0) {
+          return data;
+        }
+
+        const firstSubcategory = subcategoryItems[0];
+        const subcategoryId =
+          typeof firstSubcategory === "object" && firstSubcategory !== null
+            ? (firstSubcategory as { id?: string | number; value?: string | number }).id ??
+              (firstSubcategory as { value?: string | number }).value
+            : firstSubcategory;
+
+        if (isEmptyValue(subcategoryId)) {
+          return data;
+        }
+
+        try {
+          const subcategory = await req.payload.findByID({
+            collection: "subcategories",
+            id: subcategoryId as string | number,
+            depth: 0,
+            req,
+          });
+
+          const subcategoryCategory = (subcategory as { category?: unknown } | null)?.category;
+          const resolvedCategoryId =
+            typeof subcategoryCategory === "object" && subcategoryCategory !== null
+              ? (subcategoryCategory as { id?: string | number; value?: string | number }).id ??
+                (subcategoryCategory as { value?: string | number }).value
+              : subcategoryCategory;
+
+          if (!isEmptyValue(resolvedCategoryId)) {
+            data.category = resolvedCategoryId;
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          req.payload.logger.error(
+            `[Products/beforeChange] No se pudo inferir la categoria desde la subcategoria ${String(subcategoryId)}: ${message}`,
+          );
+        }
+
         return data;
       },
     ],
@@ -400,6 +596,11 @@ export const Products: CollectionConfig = {
                     collection: "products",
                     id: payloadId,
                     depth: 2,
+                    req,
+                    context: {
+                      ...(req?.context || {}),
+                      skipWeightGramConversion: true,
+                    },
                   })
                 : doc;
 

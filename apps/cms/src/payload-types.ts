@@ -248,13 +248,16 @@ export interface Product {
    * Introduce el precio de venta en pesos colombianos.
    */
   price: number;
-  category: number | Category;
   /**
-   * Selecciona una o varias categorías secundarias a las que pertenece el producto.
+   * Opcional si el producto tiene al menos una categoría secundaria.
+   */
+  category?: (number | null) | Category;
+  /**
+   * Opcional. Si asignas una categoría secundaria, el producto aparecerá solo en esa subcategoría (no en la categoría principal ni en otras subcategorías). No combines con categoría principal.
    */
   subcategories?: (number | Subcategory)[] | null;
   /**
-   * Introduce el peso en kilogramos.
+   * Introduce el peso en gramos.
    */
   weight?: number | null;
   status: 'draft' | 'published';

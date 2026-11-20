@@ -2,11 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CatalogWithFilters from "@/components/catalog/CatalogWithFilters";
 import { getSubcategoryBySlug } from "@/services/subcategory.service";
-import { getProductsBySubcategory } from "@/services/product.service";
+import { getProductsByCategory, getProductsBySubcategory } from "@/services/product.service";
 import type { Subcategory } from "@/types/subcategory";
 import type {
   GetProductsByCategoryParams,
   PaginatedCategoryProductsResponse,
+  Product,
 } from "@/types/product";
 
 type PageParams = { slug: string };
@@ -104,6 +105,22 @@ export default async function SubcategoryPage({
     };
   }
 
+  // "También te puede interesar": en la subcategoría, mostrar productos de la
+  // categoría principal enlazada (viceversa del caso categoría -> subcategorías).
+  let recommendedProducts: Product[] = [];
+  try {
+    if (subcategory.categoryId) {
+      const categoryProducts = await getProductsByCategory(
+        subcategory.categoryId,
+        { page: 1, limit: 12 },
+        { cache: "no-store" },
+      );
+      recommendedProducts = categoryProducts.products ?? [];
+    }
+  } catch {
+    recommendedProducts = [];
+  }
+
   const cmsBaseUrl = process.env.NEXT_PUBLIC_CMS_URL ?? process.env.CMS_URL ?? "";
 
   const filtersActive = hasActiveFilters(queryParams) || (queryParams.sort && queryParams.sort !== "popular");
@@ -122,6 +139,21 @@ export default async function SubcategoryPage({
       </nav>
 
       <header className="bg-white border-b border-gray-200 px-6 py-6">
+        <p className="text-sm text-gray-500 mb-1">
+          Categoría principal:{" "}
+          {subcategory.category?.slug ? (
+            <Link
+              href={`/categorias/${subcategory.category.slug}`}
+              className="text-gray-700 hover:text-gray-900 underline-offset-2 hover:underline"
+            >
+              {subcategory.category.name ?? "Ver categoría"}
+            </Link>
+          ) : (
+            <span className="text-gray-700">
+              {subcategory.category?.name ?? "Sin categoría"}
+            </span>
+          )}
+        </p>
         <h1 className="text-2xl font-bold text-gray-900">{subcategory.name}</h1>
         {subcategory.description ? (
           <p className="mt-2 text-gray-600 max-w-3xl">{subcategory.description}</p>
@@ -146,6 +178,7 @@ export default async function SubcategoryPage({
             limit={catalogData.limit}
             priceBounds={catalogData.meta.priceBounds}
             availableTags={catalogData.meta.availableTags}
+            recommendedProducts={recommendedProducts}
           />
         )}
       </main>
